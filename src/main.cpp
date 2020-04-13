@@ -9,6 +9,7 @@
 #include "menu.hpp"
 #include "screen.hpp"
 #include "menu_validators.hpp"
+#include "logging/logging.hpp"
 
 
 
@@ -29,7 +30,9 @@ void refreshScreen();
 
 
 void setup() {
-  if (ENABLE_DEBUG_OUTPUT) Serial.begin(57600);
+  Serial.begin(57600);
+  logging::setup(logging::NOTHING, &Serial);
+
   ns_blocker::init();
   if (ns_blocker::isBlocked()) {
     idle();
@@ -38,7 +41,7 @@ void setup() {
   initOneWire();
 
   firstGreenhouse.loadSettings();
-  secondGreenhouse.loadSettings();
+  if (HAS_SECOND_GREENHOUSE) secondGreenhouse.loadSettings();
 
 
   ns_ds18b20::init();
@@ -47,25 +50,21 @@ void setup() {
   ns_encoder::init();
 
   buildFirstGreenhouseMenu();
-  buildSecondGreenhouseMenu();
+  if (HAS_SECOND_GREENHOUSE) buildSecondGreenhouseMenu();
   buildScreenMenu();
 
-  if (ENABLE_DEBUG_OUTPUT) Serial.println(F("Setup successfully"));
+  logging::info(F("Setup successfully"));
 }
 
 
 void loop() {
   if (ns_blocker::isBlocked()) {
-    Serial.println(F("Greenhouse is blocked"));
+    logging::warning(F("Greenhouse is blocked"));
     idle();
   }
-  // Serial.println(F("firstGreenhouse.loop()"));
   firstGreenhouse.loop();
-  // Serial.println(F("secondGreenhouse.loop()"));
-  secondGreenhouse.loop();
-  // Serial.println(F("refreshScreen()"));
+  if (HAS_SECOND_GREENHOUSE) secondGreenhouse.loop();
   refreshScreen();
-  // Serial.println(F("ns_screen::loop()"));
   ns_screen::loop();
 }
 

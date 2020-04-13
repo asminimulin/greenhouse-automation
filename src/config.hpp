@@ -45,10 +45,10 @@ constexpr uint16_t EEPROM_FIRST_GREENHOUSE_PROPERTIES_ADDRESS = 200;
 
 
 // Адреса
-constexpr uint8_t FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8]    = {0};
-constexpr uint8_t FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS[8]     = {0};
-constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8]   = {0};
-constexpr uint8_t FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8]     = {0};
+constexpr uint8_t FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8]    = {0x28, 0xff, 0x53, 0xb0, 0x31, 0x18, 0x01, 0xb3};
+constexpr uint8_t FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS[8]     = {0x28, 0xff, 0x5c, 0xa7, 0x31, 0x18, 0x01, 0x62};
+constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8]   = {0x28, 0x17, 0x6A, 0x03, 0x00, 0x00, 0x80, 0x68};
+constexpr uint8_t FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8]     = {0xba, 0xa5, 0xd2, 0x73, 0x50, 0x05, 0x10, 0x5b};
 constexpr uint8_t FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS[8]      = {0};
 constexpr uint8_t FIRST_GREENHOUSE_VENT_ADDRESS[8]             = {0};
 
@@ -59,6 +59,7 @@ constexpr uint8_t FIRST_GREENHOUSE_VENT_ADDRESS[8]             = {0};
 
 
 /************************* Вторая теплица **********************/
+constexpr bool HAS_SECOND_GREENHOUSE = false;
 constexpr uint16_t EEPROM_SECOND_GREENHOUSE_PROPERTIES_ADDRESS = 300;
 
 // Адреса
