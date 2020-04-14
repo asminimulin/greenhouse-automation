@@ -1,14 +1,14 @@
 #include <Arduino.h>
 
 #include <blocker/blocker.hpp>
-#include <one_wire_driver.hpp>
+#include <one_wire_driver/one_wire_driver.hpp>
 #include <idle.hpp>
 #include <greenhouse/greenhouse.hpp>
 #include "config.hpp"
-#include "encoder.hpp"
-#include "menu.hpp"
-#include "screen.hpp"
-#include "menu_validators.hpp"
+#include "encoder/encoder.hpp"
+#include "menu/menu.hpp"
+#include "menu/menu_validators.hpp"
+#include "screen/screen.hpp"
 #include "logging/logging.hpp"
 
 
