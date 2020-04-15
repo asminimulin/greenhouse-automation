@@ -39,9 +39,11 @@ void debug(const __FlashStringHelper* message) {
 
 
 void debug(const int& t) {
-    print(F("Debug -> "), false);
-    writer->print(t);
-    writer->print('\n');
+    if (level <= LoggingLevel::DEBUG) {
+        print(F("Debug -> "), false);
+        writer->print(t);
+        writer->print('\n');
+    }
 }
 
 
