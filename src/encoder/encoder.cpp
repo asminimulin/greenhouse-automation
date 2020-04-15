@@ -10,13 +10,8 @@ namespace {
 void encoderHandler() {
     if (digitalRead(ENCODER_INTERRUPT_PIN)) return;
     digitalWrite(13, !digitalRead(13));
-    // Serial.println(F("Interrupt"));
     bool direction = digitalRead(ENCODER_DIRECTION_PIN);
     bool press = digitalRead(ENCODER_PRESS_PIN);
-    // Serial.print(F("Direction: "));
-    // Serial.println(direction);
-    // Serial.print(F("Press: "));
-    // Serial.println(press);
     if (direction && press) {
         ns_encoder::incrementPress();
     } else if (direction) {

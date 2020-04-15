@@ -44,4 +44,9 @@ void updateTime() {
     EEPROM.put(position + 1, millis() + timePassed);
 }
 
+
+uint32_t getRemainingTime() {
+    return timeHas - (timePassed + millis());
+}
+
 }

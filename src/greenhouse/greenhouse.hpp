@@ -56,22 +56,26 @@ private:
     // Configurable properties
     int8_t openingTemperature = 24;
     int8_t closingTemperature = 20;
-    uint8_t openingSteps = 4;
+    uint8_t openingSteps = 20;
 
 
 // Motor
 private:
     enum MOTOR_STATE {
-        OPENINIG = 0b10,
-        CLOSING = 0b01,
+        OPENINIG = 0b01,
+        CLOSING = 0b10,
         STOPPED = 0b11,
     };
+    uint32_t yellowWindowStateChangedAt = 0;
+    uint32_t greenWindowStateChangedAt = 0;
+
 
 // Unconfigurable properties    
 private:
     static constexpr int8_t outsideMotorEnablingTemperature = 15;
     static constexpr int8_t criticalHighTemperature = 35;
     static constexpr int8_t criticalLowTemperature = 15;
+    static constexpr uint32_t temperatureInnercyDelay = 2 * 60LU * 1000LU;
 
 
 // EEPROM specific

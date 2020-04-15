@@ -1,15 +1,16 @@
 #include <Arduino.h>
 
 #include <blocker/blocker.hpp>
-#include <one_wire_driver.hpp>
+#include <one_wire_driver/one_wire_driver.hpp>
 #include <idle.hpp>
 #include <greenhouse/greenhouse.hpp>
 #include "config.hpp"
-#include "encoder.hpp"
-#include "menu.hpp"
-#include "screen.hpp"
-#include "menu_validators.hpp"
-
+#include "encoder/encoder.hpp"
+#include "menu/menu.hpp"
+#include "menu/menu_validators.hpp"
+#include "screen/screen.hpp"
+#include "logging/logging.hpp"
+#include "connector/serial_connector.hpp"
 
 
 void buildFirstGreenhouseMenu();
@@ -25,11 +26,26 @@ Greenhouse firstGreenhouse = buildFirstGreenhouse();
 Greenhouse secondGreenhouse = buildSecondGreenhouse();
 
 
+void espHandle(Stream* stream);
+serial_connector::SerialConnector espConnector(&Serial, espHandle);
+
+
 void refreshScreen();
 
 
+void skipEspTrashWriting();
+
 void setup() {
-  if (ENABLE_DEBUG_OUTPUT) Serial.begin(57600);
+  Serial.begin(57600);
+
+  skipEspTrashWriting();
+
+  if (ENABLE_DEBUG_OUTPUT) {
+    logging::setup(logging::DEBUG, &Serial);
+  } else {
+    logging::setup(logging::NOTHING, &Serial);
+  }
+
   ns_blocker::init();
   if (ns_blocker::isBlocked()) {
     idle();
@@ -38,7 +54,7 @@ void setup() {
   initOneWire();
 
   firstGreenhouse.loadSettings();
-  secondGreenhouse.loadSettings();
+  if (HAS_SECOND_GREENHOUSE) secondGreenhouse.loadSettings();
 
 
   ns_ds18b20::init();
@@ -47,26 +63,23 @@ void setup() {
   ns_encoder::init();
 
   buildFirstGreenhouseMenu();
-  buildSecondGreenhouseMenu();
+  if (HAS_SECOND_GREENHOUSE) buildSecondGreenhouseMenu();
   buildScreenMenu();
 
-  if (ENABLE_DEBUG_OUTPUT) Serial.println(F("Setup successfully"));
+  logging::info(F("Setup successfully"));
 }
 
 
 void loop() {
   if (ns_blocker::isBlocked()) {
-    Serial.println(F("Greenhouse is blocked"));
+    logging::warning(F("Greenhouse is blocked"));
     idle();
   }
-  // Serial.println(F("firstGreenhouse.loop()"));
   firstGreenhouse.loop();
-  // Serial.println(F("secondGreenhouse.loop()"));
-  secondGreenhouse.loop();
-  // Serial.println(F("refreshScreen()"));
+  if (HAS_SECOND_GREENHOUSE) secondGreenhouse.loop();
   refreshScreen();
-  // Serial.println(F("ns_screen::loop()"));
   ns_screen::loop();
+  espConnector.loop();
 }
 
 
@@ -208,5 +221,44 @@ void buildScreenMenu() {
   item.hasCustomRepresenation = true;
   item.represent = ns_screen::screenLightSettingRepresenter;
   ns_menu::addItem(item);
+}
+
+
+enum EspCommandInterfaces: uint8_t {
+  COMMAND_GET_MEASURES = '1',
+};
+enum StatusCode: uint8_t {
+  OK = 0,
+  ERROR = 1,
+};
+void espHandle(Stream* stream) {
+  auto command = stream->read(); // we for sure know that stream is not empty (see implementation of SerialConnector)
+  if (command == COMMAND_GET_MEASURES) {
+    auto ytemp1 = static_cast<uint8_t>(firstGreenhouse.getYellowTemperature());
+    auto gtemp1 = static_cast<uint8_t>(firstGreenhouse.getGreenTemperature());
+    auto otemp1 = static_cast<uint8_t>(firstGreenhouse.getOutsideTemperature());
+    auto ytemp2 = static_cast<uint8_t>(secondGreenhouse.getYellowTemperature());
+    auto gtemp2 = static_cast<uint8_t>(secondGreenhouse.getGreenTemperature());
+    auto otemp2 = static_cast<uint8_t>(secondGreenhouse.getOutsideTemperature());
+    stream->write(OK);
+    stream->write(uint8_t(6));
+    stream->write(ytemp1);
+    stream->write(gtemp1);
+    stream->write(otemp1);
+    stream->write(ytemp2);
+    stream->write(gtemp2);
+    stream->write(otemp2);
+  } else {
+    /* Unsopported comand -> do nothing */
+    logging::error(F("Unsupported command"));
+  }
+}
+
+
+void skipEspTrashWriting() {
+  delay(3000);
+  while (Serial.available()) {
+    Serial.read();
+  }
 }
 

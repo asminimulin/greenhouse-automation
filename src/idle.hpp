@@ -2,11 +2,14 @@
 #define IDLE_HPP
 #include <Arduino.h>
 
+#include "logging/logging.hpp"
+
+
 inline void idle() {
-    Serial.println(F("idle()"));
+    logging::error(F("idle()"));
     interrupts();
     while(1) {
-        Serial.println(F("idle()"));
+        logging::error(F("idle()"));
         delay(5000lu);
     }
 }

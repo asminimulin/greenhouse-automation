@@ -48,11 +48,9 @@ void nextItem() {
                 childPosition++;
             }
             currentItemId = id;
-            printDebug();
             return;
         }
     }
-    if (ENABLE_DEBUG_OUTPUT) Serial.println(F("Blocked after nextItem()"));
     idle();
 }
 
@@ -67,7 +65,6 @@ void previousItem() {
             return;
         }
     }
-    Serial.println(F("Blocked after previousItem()"));
     idle();
 }
 
@@ -78,7 +75,6 @@ void selectFirstChild() {
         if (menuItems[i].parent == id) {
             childPosition = 0;
             currentItemId = i;
-            printDebug();
             return;
         }
     }
@@ -113,7 +109,6 @@ void init() {
 
 uint8_t addItem(const MenuItem& newItem) {
     if (menuItemsUsed == menuItemsCount) {
-        if (ENABLE_DEBUG_OUTPUT) Serial.println(F("Blocker after add Item()"));
         idle();
     }
     MenuItem& item = menuItems[menuItemsUsed];
@@ -175,7 +170,6 @@ void handleDecrementPress() {
             (*menuItems[currentItemId].value) = menuItems[currentItemId].ownValue;
             firstGreenhouse.saveSettings();
             secondGreenhouse.saveSettings();
-            printDebug();
         }
         return;
     }
