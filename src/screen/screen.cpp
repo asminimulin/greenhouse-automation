@@ -1,6 +1,7 @@
 #include "screen.hpp"
 #include "config.hpp"
 #include "idle.hpp"
+#include "logging/logging.hpp"
 
 
 namespace {
@@ -56,16 +57,16 @@ void loop() {
     if (screenLightSetting == LIGHT_ON) {
         if (!lcd.getBacklight()) {
             if (ENABLE_DEBUG_OUTPUT) {
-                Serial.print(F("ScreenLightSetting: "));
-                Serial.println(screenLightSetting);
+                logging::debug(F("ScreenLightSetting: "));
+                logging::debug(screenLightSetting);
             }
             lcd.backlight();
         }
     } else if (screenLightSetting == LIGHT_OFF) {
         if (lcd.getBacklight()) {
             if (ENABLE_DEBUG_OUTPUT) {
-                Serial.print(F("ScreenLightSetting: "));
-                Serial.println(screenLightSetting);
+                logging::debug(F("ScreenLightSetting: "));
+                logging::debug(screenLightSetting);
             }
             lcd.noBacklight();
         }
@@ -73,14 +74,14 @@ void loop() {
         bool shouldOn = millis() - lastInterrupt <= autoBacklighDisableTime;
         if (shouldOn && !lcd.getBacklight()) {
             if (ENABLE_DEBUG_OUTPUT) {
-                Serial.print(F("ScreenLightSetting: "));
-                Serial.println(screenLightSetting);
+                logging::debug(F("ScreenLightSetting: "));
+                logging::debug(screenLightSetting);
             }
             lcd.backlight();
         } else if (!shouldOn && lcd.getBacklight()) {
             if (ENABLE_DEBUG_OUTPUT) {
-                Serial.print(F("ScreenLightSetting: "));
-                Serial.println(screenLightSetting);
+                logging::debug(F("ScreenLightSetting: "));
+                logging::debug(screenLightSetting);
             }
             lcd.noBacklight();
         }

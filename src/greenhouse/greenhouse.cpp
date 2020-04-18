@@ -1,5 +1,6 @@
 #include <EEPROM.h>
 
+#include "logging/logging.hpp"
 #include "greenhouse/greenhouse.hpp"
 
 
@@ -20,39 +21,76 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition
 void Greenhouse::loop() {
     yellowMotor.loop();
     greenMotor.loop();
+
     int8_t yellowTemperature = yellowSensor.getTemperature();
-    if ((outsideSensor.getTemperature() > outsideMotorEnablingTemperature && yellowTemperature > openingTemperature) ||
-            yellowTemperature >= criticalHighTemperature) {
-        if (!yellowMotor.isBusy()) {
-            yellowMotor.setStateFor(OPENINIG, getOneStepTime());
-        }
+    int8_t greenTemperature = greenSensor.getTemperature();
+    if (yellowTemperature == 85 || yellowTemperature == -127) {
+        logging::warning(F("Yellow sensor is dead"));
+        yellowTemperature = greenTemperature;
     }
-    if ((yellowTemperature < closingTemperature && yellowTemperature < criticalHighTemperature) ||
-            yellowTemperature <= criticalLowTemperature) {
-        if (!yellowMotor.isBusy()) {
-            yellowMotor.setStateFor(CLOSING, getOneStepTime());
+    if (greenTemperature == 85 || greenTemperature == -127) {
+        logging::warning(F("Green sensor is dead"));
+        greenTemperature = yellowTemperature;
+    }
+    if (yellowTemperature == -127 || greenTemperature == -127) {
+        logging::error(F("Inside sensors are dead"));
+        yellowTemperature = greenTemperature = outsideSensor.getTemperature();
+    }
+    if (yellowTemperature == -127) {
+        logging::error(F("All temperature sensors are died."));
+        return;
+    }
+
+    bool shouldOpenYellowWindow = outsideSensor.getTemperature() > outsideMotorEnablingTemperature && yellowTemperature > openingTemperature;
+    shouldOpenYellowWindow |= yellowTemperature >= criticalHighTemperature;
+    if (shouldOpenYellowWindow) {
+        if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
+            logging::debug(F("Opening yellow window"));
+            yellowMotor.setStateFor(OPENINIG, getOneStepTime());
+            yellowWindowStateChangedAt = millis();
         }
     }
 
-    int8_t greenTemperature = greenSensor.getTemperature();
-    if ((outsideSensor.getTemperature() > outsideMotorEnablingTemperature && greenTemperature > openingTemperature) ||
-            greenTemperature >= criticalHighTemperature) {
-        if (!greenMotor.isBusy()) {
+    bool shouldCloseYellowWindow = yellowTemperature < closingTemperature && yellowTemperature < criticalHighTemperature;
+    shouldCloseYellowWindow |= yellowTemperature <= criticalLowTemperature;
+    if (shouldCloseYellowWindow) {
+        if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
+            logging::debug(F("Closing yellow window"));
+            yellowMotor.setStateFor(CLOSING, getOneStepTime());
+            yellowWindowStateChangedAt = millis();
+        }
+    }
+
+
+    bool shouldOpenGreenWindow = outsideSensor.getTemperature() > outsideMotorEnablingTemperature && greenTemperature > openingTemperature;
+    shouldOpenGreenWindow |= greenTemperature >= criticalHighTemperature;
+    
+    if (shouldOpenGreenWindow) {
+        if (!greenMotor.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
+            logging::debug(F("Opening green window"));
             greenMotor.setStateFor(OPENINIG, getOneStepTime());
+            greenWindowStateChangedAt = millis();
         }
     }
-    if ((greenTemperature < closingTemperature && greenTemperature < criticalHighTemperature) ||
-            greenTemperature <= criticalLowTemperature) {
-        if (!greenMotor.isBusy()) {
+
+    bool shouldCloseGreenWindow = greenTemperature < closingTemperature && greenTemperature < criticalHighTemperature;
+    shouldCloseGreenWindow |= greenTemperature <= criticalLowTemperature;
+    if (shouldCloseGreenWindow) {
+        if (!greenMotor.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
+            logging::debug(F("Closing green window"));
             greenMotor.setStateFor(CLOSING, getOneStepTime());
+            greenWindowStateChangedAt = millis();
         }
     }
+
 
     int averageTemperature = (int(yellowTemperature) + int(greenTemperature)) / 2;
     if (averageTemperature >= ventOnTemperature) {
-        vent_.setState(VentState::VENT_ON);
+        if (vent_.getState() != VentState::VENT_ON)
+            vent_.setState(VentState::VENT_ON);
     } else {
-        vent_.setState(VentState::VENT_OFF);
+        if (vent_.getState() != VentState::VENT_OFF)
+            vent_.setState(VentState::VENT_OFF);
     }
 }
 
@@ -60,6 +98,7 @@ void Greenhouse::loop() {
 void Greenhouse::loadSettings() {
     auto position = settingsPosition_;
     if (EEPROM.read(position) == HAS_VALID_DATA) {
+        logging::info(F("Loading greenhouse settings"));
         position++;
         EEPROM.get(position, openingTemperature);
         position++;
@@ -67,10 +106,12 @@ void Greenhouse::loadSettings() {
         position++;
         EEPROM.get(position, openingSteps);
     }
+    logging::info(F("Using default settings"));
 }
 
 
 void Greenhouse::saveSettings() {
+    logging::info(F("Save greenhouse settings"));
     auto position = settingsPosition_;
     EEPROM.write(position, HAS_VALID_DATA);
     position++;
@@ -79,7 +120,6 @@ void Greenhouse::saveSettings() {
     EEPROM.put(position, closingTemperature);
     position++;
     EEPROM.put(position, openingSteps);
-
 }
 
 
