@@ -22,7 +22,7 @@ constexpr uint8_t ONE_WIRE_PIN = 5;
  */
 
 // Читать сколько времени от периода аренды уже прошло из EEPROM?
-constexpr bool BLOCKER_USE_EEPROM = false;
+constexpr bool BLOCKER_USE_EEPROM = true;
 
 // EEPROM Адрес настроек блокировщика
 constexpr uint16_t EEPROM_BLOCKER_TIMER_ADDRESS = 100;
@@ -31,6 +31,7 @@ constexpr uint16_t EEPROM_BLOCKER_TIMER_ADDRESS = 100;
 // Мы настраиваем перед тем как сдать в аренду
 constexpr uint32_t BLOCKER_BLOCK_AFTER_MONTHS = 0;
 constexpr uint32_t BLOCKER_BLOCK_AFTER_WEEKS = 1;
+constexpr uint32_t BLOCKER_BLOCK_AFTER_MINUTES = 0;
 
 
 /***************************************************************/
@@ -47,7 +48,7 @@ constexpr uint16_t EEPROM_FIRST_GREENHOUSE_PROPERTIES_ADDRESS = 200;
 // Адреса
 constexpr uint8_t FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8]    = {0};
 constexpr uint8_t FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS[8]     = {0};
-constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8]   = {0};
+constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8]   = {0x28, 0x17, 0x6A, 0x03, 0x00, 0x00, 0x80, 0x68};
 constexpr uint8_t FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8]     = {0};
 constexpr uint8_t FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS[8]      = {0};
 constexpr uint8_t FIRST_GREENHOUSE_VENT_ADDRESS[8]             = {0};
