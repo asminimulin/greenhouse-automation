@@ -35,6 +35,10 @@ void refreshScreen();
 
 void skipEspTrashWriting();
 
+
+void notifySystemBlocked();
+
+
 void setup() {
   Serial.begin(57600);
 
@@ -48,6 +52,7 @@ void setup() {
 
   ns_blocker::init();
   if (ns_blocker::isBlocked()) {
+    notifySystemBlocked();
     idle();
   }
 
@@ -72,7 +77,7 @@ void setup() {
 
 void loop() {
   if (ns_blocker::isBlocked()) {
-    logging::warning(F("Greenhouse is blocked"));
+    notifySystemBlocked();
     idle();
   }
   firstGreenhouse.loop();
@@ -80,6 +85,7 @@ void loop() {
   refreshScreen();
   ns_screen::loop();
   espConnector.loop();
+  ns_blocker::updateTime();
 }
 
 
@@ -262,3 +268,20 @@ void skipEspTrashWriting() {
   }
 }
 
+
+void notifySystemBlocked() {
+  logging::info(F("Testing time finished. System stopped"));
+  const char* message[2];
+  message[0] = reinterpret_cast<const char*>(F("   Stop test   "));
+  message[1] = reinterpret_cast<const char*>(F(" Time finished  "));
+  char* line[2] = {ns_screen::getWritableBuffer(0),
+                   ns_screen::getWritableBuffer(1)};
+  for (int row = 0; row < 2; ++row) {
+    for (int i = 0; ; ++i) {
+      char c = pgm_read_byte(message[row] + i);
+      line[row][i] = c;
+      if (c == '\0') break;
+    }
+  }
+  ns_screen::loop();
+}

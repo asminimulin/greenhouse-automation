@@ -2,6 +2,7 @@
 #define BLOCKER_HPP
 
 #include <stdint.h>
+#include <logging/logging.hpp>
 
 
 namespace ns_blocker {
