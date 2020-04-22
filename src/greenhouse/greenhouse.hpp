@@ -91,7 +91,7 @@ private:
 private:
     static constexpr int8_t ventOnTemperature = 25;
     enum VentState {
-        VENT_ON = 0b11,
+        VENT_ON = 0b10,
         VENT_OFF = 0b00,
     };
 };
