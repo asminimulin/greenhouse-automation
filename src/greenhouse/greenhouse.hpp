@@ -70,12 +70,12 @@ private:
     uint32_t greenWindowStateChangedAt = 0;
 
 
-// Unconfigurable properties    
+// Unconfigurable properties
 private:
     static constexpr int8_t outsideMotorEnablingTemperature = 15;
     static constexpr int8_t criticalHighTemperature = 35;
     static constexpr int8_t criticalLowTemperature = 15;
-    static constexpr uint32_t temperatureInnercyDelay = 2 * 60LU * 1000LU;
+    static constexpr uint32_t temperatureInnercyDelay = 4 * 60LU * 1000LU;
 
 
 // EEPROM specific
