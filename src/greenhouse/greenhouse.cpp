@@ -12,7 +12,7 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition
     outsideSensor(config.outsideSensorAddress),
     vent_(config.ventAddress) {
         settingsPosition_ = settingsPosition;
-        openingSteps = 4;
+        openingSteps = 6;
         openingTemperature = 24;
         closingTemperature = 20;
 }

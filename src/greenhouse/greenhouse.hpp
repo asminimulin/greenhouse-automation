@@ -56,7 +56,7 @@ private:
     // Configurable properties
     int8_t openingTemperature = 24;
     int8_t closingTemperature = 20;
-    uint8_t openingSteps = 20;
+    uint8_t openingSteps = 6;
 
 
 // Motor
