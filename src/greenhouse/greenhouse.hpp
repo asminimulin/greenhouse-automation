@@ -27,6 +27,7 @@ class Greenhouse {
     friend bool validateSecondOpeningTemperature(int8_t temp);
     friend bool validateSecondClosingTemperature(int8_t temp);
     friend bool validateSecondOpeningSteps(int8_t steps);
+    friend void buildSummerModeMenu();
 
 public:
     Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition);
@@ -57,6 +58,7 @@ private:
     int8_t openingTemperature = 24;
     int8_t closingTemperature = 20;
     uint8_t openingSteps = 6;
+    static uint8_t summerMode;
 
 
 // Motor

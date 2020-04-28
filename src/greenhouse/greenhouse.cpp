@@ -3,6 +3,8 @@
 #include "logging/logging.hpp"
 #include "greenhouse/greenhouse.hpp"
 
+uint8_t Greenhouse::summerMode = true;
+
 
 Greenhouse::Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition):
     yellowMotor(config.yellowMotorAddress),
@@ -19,6 +21,7 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition
 
 
 void Greenhouse::loop() {
+    summerMode &= 1;
     yellowMotor.loop();
     greenMotor.loop();
 
@@ -44,6 +47,7 @@ void Greenhouse::loop() {
 
     bool shouldOpenYellowWindow = outsideSensor.getTemperature() > outsideMotorEnablingTemperature && yellowTemperature > openingTemperature;
     shouldOpenYellowWindow |= yellowTemperature >= criticalHighTemperature;
+    shouldOpenYellowWindow &= summerMode;
     if (shouldOpenYellowWindow) {
         if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Opening yellow window"));
@@ -54,6 +58,7 @@ void Greenhouse::loop() {
 
     bool shouldCloseYellowWindow = yellowTemperature < closingTemperature && yellowTemperature < criticalHighTemperature;
     shouldCloseYellowWindow |= outsideTemperature <= criticalLowTemperature;
+    shouldCloseYellowWindow |= !summerMode;
     if (shouldCloseYellowWindow) {
         if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Closing yellow window"));
@@ -65,7 +70,7 @@ void Greenhouse::loop() {
 
     bool shouldOpenGreenWindow = outsideSensor.getTemperature() > outsideMotorEnablingTemperature && greenTemperature > openingTemperature;
     shouldOpenGreenWindow |= greenTemperature >= criticalHighTemperature;
-    
+    shouldOpenGreenWindow &= summerMode;
     if (shouldOpenGreenWindow) {
         if (!greenMotor.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Opening green window"));
@@ -76,6 +81,7 @@ void Greenhouse::loop() {
 
     bool shouldCloseGreenWindow = greenTemperature < closingTemperature && greenTemperature < criticalHighTemperature;
     shouldCloseGreenWindow |= outsideTemperature <= criticalLowTemperature;
+    shouldOpenGreenWindow |= !summerMode;
     if (shouldCloseGreenWindow) {
         if (!greenMotor.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Closing green window"));

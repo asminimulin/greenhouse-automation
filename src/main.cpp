@@ -16,6 +16,7 @@
 void buildFirstGreenhouseMenu();
 void buildSecondGreenhouseMenu();
 void buildScreenMenu();
+void buildSummerModeMenu();
 
 
 Greenhouse buildFirstGreenhouse();
@@ -70,6 +71,7 @@ void setup() {
   buildFirstGreenhouseMenu();
   if (HAS_SECOND_GREENHOUSE) buildSecondGreenhouseMenu();
   buildScreenMenu();
+  buildSummerModeMenu();
 
   logging::info(F("Setup successfully"));
 }
@@ -230,6 +232,27 @@ void buildScreenMenu() {
 }
 
 
+void repsentSummerMode(int8_t value, char* buffer) {
+  if ((value & 1) == 0) {
+    strcpy_P(buffer, reinterpret_cast<const char*>(F("OFF")));
+  } else {
+    strcpy_P(buffer, reinterpret_cast<const char*>(F("ON")));
+  }
+}
+
+
+void buildSummerModeMenu() {
+  MenuItem item;
+  item.parent = ns_menu::getRoot();
+  item.name = F("Summer mode");
+  item.isLeaf = true;
+  item.value = reinterpret_cast<int8_t*>(&Greenhouse::summerMode);
+  item.hasCustomRepresenation = true;
+  item.represent = repsentSummerMode;
+  ns_menu::addItem(item);
+}
+
+
 enum EspCommandInterfaces: uint8_t {
   COMMAND_GET_MEASURES = '1',
 };
@@ -273,7 +296,7 @@ void notifySystemBlocked() {
   logging::info(F("Testing time finished. System stopped"));
   const char* message[2];
   message[0] = reinterpret_cast<const char*>(F("   Stop test   "));
-  message[1] = reinterpret_cast<const char*>(F(" Time finished  "));
+  message[1] = reinterpret_cast<const char*>(F("   Time is up  "));
   char* line[2] = {ns_screen::getWritableBuffer(0),
                    ns_screen::getWritableBuffer(1)};
   for (int row = 0; row < 2; ++row) {
