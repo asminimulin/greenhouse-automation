@@ -38,6 +38,8 @@ public:
     int8_t getOutsideTemperature() { return outsideSensor.getTemperature(); }
     int8_t getYellowTemperature() { return yellowSensor.getTemperature(); }
     int8_t getGreenTemperature() { return greenSensor.getTemperature(); }
+    bool getSummerMode() const noexcept { return bool(summerMode & 1); }
+    void setSummeMode(bool enabled) noexcept { summerMode = enabled; }
 
 
 private:

@@ -47,7 +47,7 @@ void Greenhouse::loop() {
 
     bool shouldOpenYellowWindow = outsideSensor.getTemperature() > outsideMotorEnablingTemperature && yellowTemperature > openingTemperature;
     shouldOpenYellowWindow |= yellowTemperature >= criticalHighTemperature;
-    shouldOpenYellowWindow &= summerMode;
+    shouldOpenYellowWindow &= bool(summerMode);
     if (shouldOpenYellowWindow) {
         if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Opening yellow window"));
@@ -56,21 +56,9 @@ void Greenhouse::loop() {
         }
     }
 
-    bool shouldCloseYellowWindow = yellowTemperature < closingTemperature && yellowTemperature < criticalHighTemperature;
-    shouldCloseYellowWindow |= outsideTemperature <= criticalLowTemperature;
-    shouldCloseYellowWindow |= !summerMode;
-    if (shouldCloseYellowWindow) {
-        if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
-            logging::debug(F("Closing yellow window"));
-            yellowMotor.setStateFor(CLOSING, getOneStepTime());
-            yellowWindowStateChangedAt = millis();
-        }
-    }
-
-
     bool shouldOpenGreenWindow = outsideSensor.getTemperature() > outsideMotorEnablingTemperature && greenTemperature > openingTemperature;
     shouldOpenGreenWindow |= greenTemperature >= criticalHighTemperature;
-    shouldOpenGreenWindow &= summerMode;
+    shouldOpenGreenWindow &= bool(summerMode);
     if (shouldOpenGreenWindow) {
         if (!greenMotor.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Opening green window"));
@@ -79,9 +67,20 @@ void Greenhouse::loop() {
         }
     }
 
+    bool shouldCloseYellowWindow = yellowTemperature < closingTemperature && yellowTemperature < criticalHighTemperature;
+    shouldCloseYellowWindow |= outsideTemperature <= criticalLowTemperature;
+    shouldCloseYellowWindow |= !bool(summerMode);
+    if (shouldCloseYellowWindow) {
+        if (!yellowMotor.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
+            logging::debug(F("Closing yellow window"));
+            yellowMotor.setStateFor(CLOSING, getOneStepTime());
+            yellowWindowStateChangedAt = millis();
+        }
+    }
+
     bool shouldCloseGreenWindow = greenTemperature < closingTemperature && greenTemperature < criticalHighTemperature;
     shouldCloseGreenWindow |= outsideTemperature <= criticalLowTemperature;
-    shouldOpenGreenWindow |= !summerMode;
+    shouldOpenGreenWindow |= !bool(summerMode);
     if (shouldCloseGreenWindow) {
         if (!greenMotor.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("Closing green window"));
@@ -112,6 +111,8 @@ void Greenhouse::loadSettings() {
         EEPROM.get(position, closingTemperature);
         position++;
         EEPROM.get(position, openingSteps);
+        position += sizeof(openingSteps);
+        EEPROM.get(position, summerMode);
     }
     logging::info(F("Using default settings"));
 }
@@ -127,6 +128,8 @@ void Greenhouse::saveSettings() {
     EEPROM.put(position, closingTemperature);
     position++;
     EEPROM.put(position, openingSteps);
+    position += sizeof(openingSteps);
+    EEPROM.put(position, summerMode);
 }
 
 

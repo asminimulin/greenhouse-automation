@@ -52,11 +52,6 @@ void init() {
 
 bool isBlocked() {
     bool result = millis() + timePassed >= timeHas;
-    if (result) {
-        logging::info(F("Blocker: System is blocked"));
-    } else {
-        logging::info(F("Blocker: System is still not blocked"));
-    }
     return result;
 }
 

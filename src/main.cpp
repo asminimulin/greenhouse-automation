@@ -150,7 +150,7 @@ void refreshScreen() {
     sprintf(firstRow, "Y:%s G:%s Out:%s", buf[0], buf[1], buf[2]);
     Greenhouse::getTempRepresentation(secondGreenhouse.getYellowTemperature(), buf[0]);
     Greenhouse::getTempRepresentation(secondGreenhouse.getGreenTemperature(), buf[1]);
-    sprintf(secondRow, "Y:%s G:%s", buf[0], buf[1]);
+    sprintf(secondRow, "Y:%s G:%s S:%s", buf[0], buf[1], (firstGreenhouse.getSummerMode() ? "ON" : "OFF"));
   } else {
     char *firstRow = ns_screen::getWritableBuffer(0);
     char *secondRow = ns_screen::getWritableBuffer(1);
