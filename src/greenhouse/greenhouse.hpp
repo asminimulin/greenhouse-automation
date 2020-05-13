@@ -4,6 +4,7 @@
 #include "ds18b20.hpp"
 #include "ds2413.hpp"
 #include "config.hpp"
+#include "window.hpp"
 
 
 struct GreenhouseConfig {
@@ -19,6 +20,7 @@ DeviceAddress ventAddress;
 
 
 class Greenhouse {
+
     friend void buildFirstGreenhouseMenu();
     friend void buildSecondGreenhouseMenu();
     friend bool validateFirstOpeningTemperature(int8_t temp);
@@ -40,16 +42,16 @@ public:
     int8_t getGreenTemperature() { return greenSensor.getTemperature(); }
     bool getSummerMode() const noexcept { return bool(summerMode & 1); }
     void setSummeMode(bool enabled) noexcept { summerMode = enabled; }
+    inline uint8_t getYellowPerCent() const noexcept { return yellowWindow_.getPerCent(); }
+    inline uint8_t getGreenPerCent() const noexcept { return greenWindow_.getPerCent(); }
 
 private:
     uint32_t getOneStepTime() const {
         return MOTOR_OPENING_TIME / openingSteps;
     }
 
-    
-private:
-    DS2413 yellowMotor;
-    DS2413 greenMotor;
+    Window yellowWindow_;
+    Window greenWindow_;
     DS18B20 yellowSensor;
     DS18B20 greenSensor;
     DS18B20 outsideSensor;
@@ -64,11 +66,6 @@ private:
 
 // Motor
 private:
-    enum MOTOR_STATE {
-        OPENINIG = 0b01,
-        CLOSING = 0b10,
-        STOPPED = 0b11,
-    };
     uint32_t yellowWindowStateChangedAt = 0;
     uint32_t greenWindowStateChangedAt = 0;
 
@@ -79,13 +76,13 @@ private:
     static constexpr int8_t criticalHighTemperature = 35;
     static constexpr int8_t criticalLowTemperature = 15;
     static constexpr uint32_t temperatureInnercyDelay = 4 * 60LU * 1000LU;
-
+    static constexpr uint32_t openingTime = MOTOR_OPENING_TIME;
 
 // EEPROM specific
 private:
     enum {
         NO_VALID_DATA = 0,
-        HAS_VALID_DATA = 1
+        HAS_VALID_DATA = 1,
     };
     uint16_t settingsPosition_;
 

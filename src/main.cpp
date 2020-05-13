@@ -140,7 +140,7 @@ void ns_encoder::decrementPress() {
 
 
 void refreshScreen() {
-  char buf[3][3];  
+  char buf[3][3];
   if (!ns_menu::isEnabled()) {
     char* firstRow = ns_screen::getWritableBuffer(0);
     char* secondRow = ns_screen::getWritableBuffer(1);
@@ -275,8 +275,8 @@ void espHandle(Stream* stream) {
     stream->write(ytemp1);
     stream->write(gtemp1);
     stream->write(uint8_t(firstGreenhouse.getVentStatus()));
-    stream->write(uint8_t(0)); // yellow window per cent
-    stream->write(uint8_t(0)); // yellow window per cent
+    stream->write(firstGreenhouse.getYellowPerCent()); // yellow window per cent
+    stream->write(firstGreenhouse.getGreenPerCent()); // green window per cent
     stream->write(uint8_t(0)); // blue humidity
     stream->write(uint8_t(false)); // blue watering status
     stream->write(uint8_t(0)); // red humidity
@@ -285,8 +285,8 @@ void espHandle(Stream* stream) {
     stream->write(ytemp2);
     stream->write(gtemp2);
     stream->write(uint8_t(secondGreenhouse.getVentStatus()));
-    stream->write(uint8_t(0)); // yellow window per cent
-    stream->write(uint8_t(0)); // yellow window per cent
+    stream->write(secondGreenhouse.getYellowPerCent()); // yellow window per cent
+    stream->write(secondGreenhouse.getGreenPerCent()); // green window per cent
     stream->write(uint8_t(0)); // blue humidity
     stream->write(uint8_t(false)); // blue watering status
     stream->write(uint8_t(0)); // red humidity
