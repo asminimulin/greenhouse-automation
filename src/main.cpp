@@ -150,7 +150,7 @@ void refreshScreen() {
     sprintf(firstRow, "Y:%s G:%s Out:%s", buf[0], buf[1], buf[2]);
     Greenhouse::getTempRepresentation(secondGreenhouse.getYellowTemperature(), buf[0]);
     Greenhouse::getTempRepresentation(secondGreenhouse.getGreenTemperature(), buf[1]);
-    sprintf(secondRow, "Y:%s G:%s S:%s", buf[0], buf[1], (firstGreenhouse.getSummerMode() ? "ON" : "OFF"));
+    sprintf(secondRow, "Y:%s G:%s Sum:%s", buf[0], buf[1], (firstGreenhouse.getSummerMode() ? "ON" : "OFF"));
   } else {
     char *firstRow = ns_screen::getWritableBuffer(0);
     char *secondRow = ns_screen::getWritableBuffer(1);
@@ -265,18 +265,32 @@ void espHandle(Stream* stream) {
   if (command == COMMAND_GET_MEASURES) {
     auto ytemp1 = static_cast<uint8_t>(firstGreenhouse.getYellowTemperature());
     auto gtemp1 = static_cast<uint8_t>(firstGreenhouse.getGreenTemperature());
-    auto otemp1 = static_cast<uint8_t>(firstGreenhouse.getOutsideTemperature());
+    auto otemp = static_cast<uint8_t>(firstGreenhouse.getOutsideTemperature());
     auto ytemp2 = static_cast<uint8_t>(secondGreenhouse.getYellowTemperature());
     auto gtemp2 = static_cast<uint8_t>(secondGreenhouse.getGreenTemperature());
-    auto otemp2 = static_cast<uint8_t>(secondGreenhouse.getOutsideTemperature());
     stream->write(OK);
-    stream->write(uint8_t(6));
+    stream->write(uint8_t(19));
+    stream->write(otemp);
+
     stream->write(ytemp1);
     stream->write(gtemp1);
-    stream->write(otemp1);
+    stream->write(uint8_t(firstGreenhouse.getVentStatus()));
+    stream->write(uint8_t(0)); // yellow window per cent
+    stream->write(uint8_t(0)); // yellow window per cent
+    stream->write(uint8_t(0)); // blue humidity
+    stream->write(uint8_t(false)); // blue watering status
+    stream->write(uint8_t(0)); // red humidity
+    stream->write(uint8_t(false)); // red watering status
+    
     stream->write(ytemp2);
     stream->write(gtemp2);
-    stream->write(otemp2);
+    stream->write(uint8_t(secondGreenhouse.getVentStatus()));
+    stream->write(uint8_t(0)); // yellow window per cent
+    stream->write(uint8_t(0)); // yellow window per cent
+    stream->write(uint8_t(0)); // blue humidity
+    stream->write(uint8_t(false)); // blue watering status
+    stream->write(uint8_t(0)); // red humidity
+    stream->write(uint8_t(false)); // red watering status
   } else {
     /* Unsopported comand -> do nothing */
     logging::error(F("Unsupported command"));

@@ -41,7 +41,6 @@ public:
     bool getSummerMode() const noexcept { return bool(summerMode & 1); }
     void setSummeMode(bool enabled) noexcept { summerMode = enabled; }
 
-
 private:
     uint32_t getOneStepTime() const {
         return MOTOR_OPENING_TIME / openingSteps;
@@ -98,6 +97,9 @@ private:
         VENT_ON = 0b10,
         VENT_OFF = 0b00,
     };
+
+public:
+    inline bool getVentStatus() noexcept { return vent_.getState() == VENT_ON; }
 };
 
 #endif
