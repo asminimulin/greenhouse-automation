@@ -3,8 +3,8 @@
 
 Window::Window(uint32_t fullTime, const DeviceAddress address) noexcept
     : device_(address)
-    , fullTime_(fullTime)
-    , balance_(0) {
+    , balance_(0)
+    , fullTime_(fullTime) {
         isValid_ = reinterpret_cast<const uint64_t*>(address) != 0;
     }
 
