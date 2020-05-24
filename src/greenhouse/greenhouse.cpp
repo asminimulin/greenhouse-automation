@@ -94,7 +94,7 @@ void Greenhouse::loop() {
     if (averageTemperature >= ventOnTemperature) {
         if (vent_.getState() != VentState::VENT_ON)
             vent_.setState(VentState::VENT_ON);
-    } else {
+    } else if (averageTemperature <= ventOnTemperature - 2) { // NOTE: 2 is histeresis value for vent ON/OFF
         if (vent_.getState() != VentState::VENT_OFF)
             vent_.setState(VentState::VENT_OFF);
     }
