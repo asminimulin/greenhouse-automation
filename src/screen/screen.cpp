@@ -16,7 +16,8 @@ void fillSpaces(char* buffer) {
 
 
 void fillSpaces(char* buffer, int start, int end) {
-    memset(&buffer[start], ' ', end - start);
+    if (end < start) return;
+    memset(&buffer[start], ' ', end - start + 1);
     buffer[end] = '\0';
 }
 
