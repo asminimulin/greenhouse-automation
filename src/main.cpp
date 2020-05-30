@@ -255,6 +255,7 @@ void buildSummerModeMenu() {
 
 enum EspCommandInterfaces: uint8_t {
   COMMAND_GET_MEASURES = '1',
+  COMMAND_GET_SETTINGS = '2',
 };
 enum StatusCode: uint8_t {
   OK = 0,
@@ -269,7 +270,8 @@ void espHandle(Stream* stream) {
     auto ytemp2 = static_cast<uint8_t>(secondGreenhouse.getYellowTemperature());
     auto gtemp2 = static_cast<uint8_t>(secondGreenhouse.getGreenTemperature());
     stream->write(OK);
-    stream->write(uint8_t(19));
+    uint8_t messageSize = 19;  // measures size
+    stream->write(uint8_t(messageSize));
     stream->write(otemp);
 
     stream->write(ytemp1);
@@ -291,6 +293,19 @@ void espHandle(Stream* stream) {
     stream->write(uint8_t(false)); // blue watering status
     stream->write(uint8_t(0)); // red humidity
     stream->write(uint8_t(false)); // red watering status
+
+  } else if (command == COMMAND_GET_SETTINGS) {
+    stream->write(OK);
+    uint8_t messageSize = 3 * 2;  // settings size
+    stream->write(uint8_t(messageSize));
+
+    stream->write(uint8_t(firstGreenhouse.getOpeningTemperature()));
+    stream->write(uint8_t(firstGreenhouse.getClosingTemperature()));
+    stream->write(firstGreenhouse.getStepsCount());
+
+    stream->write(uint8_t(secondGreenhouse.getOpeningTemperature()));
+    stream->write(uint8_t(secondGreenhouse.getClosingTemperature()));
+    stream->write(secondGreenhouse.getStepsCount());
   } else {
     /* Unsopported comand -> do nothing */
     logging::error(F("Unsupported command"));

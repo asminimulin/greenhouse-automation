@@ -44,7 +44,10 @@ public:
     void setSummeMode(bool enabled) noexcept { summerMode = enabled; }
     inline uint8_t getYellowPerCent() const noexcept { return yellowWindow_.getPerCent(); }
     inline uint8_t getGreenPerCent() const noexcept { return greenWindow_.getPerCent(); }
-
+    inline int8_t getOpeningTemperature() const noexcept { return openingTemperature; }
+    inline int8_t getClosingTemperature() const noexcept { return closingTemperature; }
+    inline uint8_t getStepsCount() const noexcept { return openingSteps; }
+    
 private:
     uint32_t getOneStepTime() const {
         return MOTOR_OPENING_TIME / openingSteps;
