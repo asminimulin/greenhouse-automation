@@ -18,7 +18,8 @@ void init() {
     dt.begin();
     dt.setResolution(MINIMAL_RESOLUTION);
     dt.setWaitForConversion(false);
-    CONVERSION_TIME = dt.millisToWaitForConversion(MINIMAL_RESOLUTION);
+    //CONVERSION_TIME = dt.millisToWaitForConversion(MINIMAL_RESOLUTION);
+    CONVERSION_TIME = 1000;
 }
 
 

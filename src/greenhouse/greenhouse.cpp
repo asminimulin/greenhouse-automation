@@ -134,8 +134,10 @@ void Greenhouse::saveSettings() {
 
 
 void Greenhouse::getTempRepresentation(int8_t temperature, char* buffer) {
-    if (temperature == -127 || temperature == 85) {
+    if (temperature == -127) {
         sprintf(buffer, "--");
+    } else if (temperature == 85) {
+        sprintf(buffer, "__");
     } else {
         sprintf(buffer, "%d", temperature);
     }

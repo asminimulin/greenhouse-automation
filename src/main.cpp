@@ -64,14 +64,22 @@ void setup() {
 
 
   ns_ds18b20::init();
+  logging::info(F("ds18b20 is ready ready"));
+
   ns_menu::init();
+  logging::info(F("menu is ready"));
+
   ns_screen::init();
+  logging::info(F("screen is ready"));
+
   ns_encoder::init();
+  logging::info(F("encoder is ready"));
 
   buildFirstGreenhouseMenu();
   if (HAS_SECOND_GREENHOUSE) buildSecondGreenhouseMenu();
   buildScreenMenu();
   buildSummerModeMenu();
+  logging::info(F("Greenhouses are ready"));
 
   logging::info(F("Setup successfully"));
 }
@@ -213,7 +221,7 @@ void buildSecondGreenhouseMenu() {
 
   item.name = F("Opening steps");
   item.parent = rootId;
-  item.value = reinterpret_cast<int8_t*>(&firstGreenhouse.openingSteps);
+  item.value = reinterpret_cast<int8_t*>(&secondGreenhouse.openingSteps);
   item.isLeaf = true;
   item.validator = validateSecondOpeningSteps;
   ns_menu::addItem(item);
@@ -307,7 +315,7 @@ void espHandle(Stream* stream) {
     stream->write(uint8_t(secondGreenhouse.getClosingTemperature()));
     stream->write(secondGreenhouse.getStepsCount());
   } else {
-    /* Unsopported comand -> do nothing */
+    /* Unsupported comand -> do nothing */
     logging::error(F("Unsupported command"));
   }
 }

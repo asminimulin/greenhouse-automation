@@ -11,14 +11,14 @@ DS2413::DS2413(const uint8_t* address) {
 }
 
 
-void DS2413::setState(uint8_t state) {
+bool DS2413::setState(uint8_t state) {
     if (isBusy()) {
         logging::error(F("Tried to setState on busy ds2413"));
-        return;
+        return false;
     }
     if (state_ == state) {
         logging::warning(F("Setting the same state on ds2413"));
-        return;
+        return false;
     }
     logging::debug(F("ds2413 set state:"));
     logging::debug(int(state));
@@ -30,7 +30,16 @@ void DS2413::setState(uint8_t state) {
     ow->write(DS2413_ACCESS_WRITE);
     ow->write(state);
     ow->write(~state);
+
+    bool ack = DS2413_ACK_SUCCESS == ow->read();  // 0xAA=success, 0xFF=failure
+    if (ack) {
+        ow->read();  // Read the status byte
+    }
     ow->reset();
+    if (!ack) {
+        logging::debug(F("Failed to write to ds2413"));
+    }
+    return ack;
 }
 
 

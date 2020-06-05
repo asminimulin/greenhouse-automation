@@ -21,6 +21,11 @@ void setup(LoggingLevel level, Print* output);
 
 void debug(const __FlashStringHelper* message);
 
+template<typename T>
+void debug(const T& arg) {
+    Serial.println(arg);
+}
+
 
 void error(const __FlashStringHelper* message);
 

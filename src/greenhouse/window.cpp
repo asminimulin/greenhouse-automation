@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "logging/logging.hpp"
 
 
 Window::Window(uint32_t fullTime, const DeviceAddress address) noexcept
@@ -14,6 +15,8 @@ void Window::stepOpen(int32_t time) {
         balance_ += time;
         device_.setStateFor(OPENINIG, time);
         balance_ = constrain(balance_, time, fullTime_ + timeInfelicity);
+    } else {
+        logging::info(F("No need to open: balance is maximum"));
     }
 }
 
@@ -23,5 +26,7 @@ void Window::stepClose(int32_t time) {
         balance_ -= time;
         device_.setStateFor(CLOSING, time);
         balance_ = constrain(balance_, -timeInfelicity, fullTime_ - time);
+    } else {
+        logging::info(F("No need to close: balance is minimum"));
     }
 }

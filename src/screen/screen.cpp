@@ -96,7 +96,7 @@ void init() {
     lcd.noBlink();
     lcd.noCursor();
     lastInterrupt = 0;
-    screenLightSetting = LIGHT_AUTO;
+    screenLightSetting = LIGHT_ON;
 }
 
 

@@ -4,7 +4,7 @@
 class DS2413 {
 public:
     DS2413(const uint8_t* address);
-    void setState(uint8_t state);
+    bool setState(uint8_t state);
     void setStateFor(uint8_t state, uint32_t time);
     uint8_t getState() const;
     void loop();

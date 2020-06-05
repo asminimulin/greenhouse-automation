@@ -5,7 +5,7 @@
 
 namespace {
 
-static constexpr uint8_t menuItemsCount = 10;
+static constexpr uint8_t menuItemsCount = 15;
 static MenuItem menuItems[menuItemsCount];
 static uint8_t menuItemsUsed;
 static uint8_t currentItemId;
@@ -109,6 +109,7 @@ void init() {
 
 uint8_t addItem(const MenuItem& newItem) {
     if (menuItemsUsed == menuItemsCount) {
+        logging::error(F("No more menu items to hold full menu"));
         idle();
     }
     MenuItem& item = menuItems[menuItemsUsed];

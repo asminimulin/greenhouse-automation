@@ -78,7 +78,7 @@ private:
     static constexpr int8_t outsideMotorEnablingTemperature = 15;
     static constexpr int8_t criticalHighTemperature = 35;
     static constexpr int8_t criticalLowTemperature = 15;
-    static constexpr uint32_t temperatureInnercyDelay = 4 * 60LU * 1000LU;
+    static constexpr uint32_t temperatureInnercyDelay = 0.25 * 60LU * 1000LU;
     static constexpr uint32_t openingTime = MOTOR_OPENING_TIME;
 
 // EEPROM specific
