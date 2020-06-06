@@ -7,9 +7,12 @@
 #define ONEWIRE_CRC16 0
 
 #include <OneWire.h>
+#include <greenhouse/ds2413_driver.hpp>
 
 void initOneWire();
-
 OneWire* getOneWire();
+
+void initDS2413Driver();
+DS2413Driver<5>* getDS2413Driver();
 
 #endif

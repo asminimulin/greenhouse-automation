@@ -1,7 +1,7 @@
 #ifndef DS18B20_HPP
 #define DS18B20_HPP
 
-#include <one_wire_driver/one_wire_driver.hpp>
+#include <global_singletons.hpp>
 
 
 #define REQUIRESNEW false

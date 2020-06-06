@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include <blocker/blocker.hpp>
-#include <one_wire_driver/one_wire_driver.hpp>
+#include <global_singletons.hpp>
 #include <idle.hpp>
 #include <greenhouse/greenhouse.hpp>
 #include "config.hpp"
@@ -11,6 +11,7 @@
 #include "screen/screen.hpp"
 #include "logging/logging.hpp"
 #include "connector/serial_connector.hpp"
+#include "greenhouse/ds2413_driver.hpp"
 
 
 void buildFirstGreenhouseMenu();
@@ -96,6 +97,7 @@ void loop() {
   ns_screen::loop();
   espConnector.loop();
   ns_blocker::updateTime();
+  getDS2413Driver()->loop();
 }
 
 

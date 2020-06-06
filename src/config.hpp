@@ -110,6 +110,6 @@ constexpr uint8_t HISTERESIS = 2;
 
 
 // Печатать отладочную информацию?
-constexpr bool ENABLE_DEBUG_OUTPUT = false;
+constexpr bool ENABLE_DEBUG_OUTPUT = true;
 
 #endif

@@ -1,4 +1,4 @@
-#include "one_wire_driver/one_wire_driver.hpp"
+#include "global_singletons.hpp"
 #include "greenhouse/ds18b20.hpp"
 
 namespace {
@@ -44,6 +44,7 @@ DS18B20::DS18B20(const DeviceAddress& address) {
 int8_t DS18B20::getTemperature() {
     if (ns_ds18b20::refreshTemperatures()) {
         cachedTemperature = dt.getTempC(address_);
+        // if (cachedTemperature == -127) cachedTemperature = 40;
     }
     return cachedTemperature;
 }

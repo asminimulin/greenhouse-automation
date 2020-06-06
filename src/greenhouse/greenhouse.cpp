@@ -50,7 +50,7 @@ void Greenhouse::loop() {
     shouldOpenYellowWindow &= bool(summerMode);
     if (shouldOpenYellowWindow) {
         if (!yellowWindow_.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
-            logging::debug(F("Opening yellow window"));
+            logging::debug(F("stepOpen yellow window"));
             yellowWindow_.stepOpen(getOneStepTime());
             yellowWindowStateChangedAt = millis();
         }
@@ -61,7 +61,7 @@ void Greenhouse::loop() {
     shouldOpenGreenWindow &= bool(summerMode);
     if (shouldOpenGreenWindow) {
         if (!greenWindow_.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
-            logging::debug(F("Opening green window"));
+            logging::debug(F("stepOpen green window"));
             greenWindow_.stepOpen(getOneStepTime());
             greenWindowStateChangedAt = millis();
         }
@@ -72,7 +72,7 @@ void Greenhouse::loop() {
     shouldCloseYellowWindow |= !bool(summerMode);
     if (shouldCloseYellowWindow) {
         if (!yellowWindow_.isBusy() && millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
-            logging::debug(F("Closing yellow window"));
+            logging::debug(F("stepClose yellow window"));
             yellowWindow_.stepClose(getOneStepTime());
             yellowWindowStateChangedAt = millis();
         }
@@ -83,7 +83,7 @@ void Greenhouse::loop() {
     shouldOpenGreenWindow |= !bool(summerMode);
     if (shouldCloseGreenWindow) {
         if (!greenWindow_.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
-            logging::debug(F("Closing green window"));
+            logging::debug(F("stepClose green window"));
             greenWindow_.stepClose(getOneStepTime());
             greenWindowStateChangedAt = millis();
         }
