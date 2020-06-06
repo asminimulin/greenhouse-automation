@@ -27,6 +27,7 @@ void Window::stepOpen(int32_t time)
         // device_.setStateFor(OPENINIG, time);  // old
         {
             ds2413_driver::Task task(&openingRoutine_, time, &stoppingRoutine_);
+            task.setName(F("Opening task"));
             if (!getDS2413Driver()->hasTask(task)) {
                 getDS2413Driver()->createTask(task);
             } else {
@@ -48,7 +49,8 @@ void Window::stepClose(int32_t time)
 
         // device_.setStateFor(CLOSING, time);                              // old
         {
-            ds2413_driver::Task task(&closingRoutine_, time, &stoppingRoutine_);  // new 
+            ds2413_driver::Task task(&closingRoutine_, time, &stoppingRoutine_);  // new
+            task.setName(F("Closing task"));
             if (!getDS2413Driver()->hasTask(task)) {
                 getDS2413Driver()->createTask(task);
             } else {

@@ -34,6 +34,7 @@ public:
     bool operator==(const Task& other) const noexcept;
     inline bool isComplete() const noexcept { return state_ == STATE_COMPLETE; }
     void loop();
+    inline void setName(const __FlashStringHelper* name) noexcept { name_ = name; }
 
 
 private:
@@ -50,6 +51,7 @@ private:
     uint32_t delayCompleteTime_;
     routine_t* beforeRoutine_;
     routine_t* afterRoutine_;
+    const __FlashStringHelper* name_;
     state_t state_;
 };
 
@@ -77,10 +79,9 @@ public:
     {
         if (isEmpty()) return false;
         pos_t i = head_;
-        do {
+        for (pos_t i = head_; i != tail_; i = (i + 1) % MAX_TASKS_COUNT) {
             if (task == queue_[i]) return true;
-            i = (i + 1) % MAX_TASKS_COUNT;
-        } while (i != tail_);
+        }
         return false;
     }
 
@@ -134,12 +135,15 @@ private:
     void appendTask(const Task& task) noexcept
     {
         // Here we know for sure, that queue is not full
-        tail_ = (tail_ + 1) % MAX_TASKS_COUNT;
         queue_[tail_] = task;
+        tail_ = (tail_ + 1) % MAX_TASKS_COUNT;
+        logging::info(F("Task appended"));
     }
 
     void popTask() noexcept {
+        // Here we know for sure that queue is not empty
         head_ = (head_ + 1) % MAX_TASKS_COUNT;
+        logging::info(F("Task removed"));
     }
 
     Task& frontTask()

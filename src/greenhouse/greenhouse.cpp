@@ -28,19 +28,19 @@ void Greenhouse::loop() {
     int8_t yellowTemperature = yellowSensor.getTemperature();
     int8_t greenTemperature = greenSensor.getTemperature();
     int8_t outsideTemperature = outsideSensor.getTemperature();
-    if (yellowTemperature == 85 || yellowTemperature == -127) {
+    if (yellowTemperature == -127) {
         logging::warning(F("Yellow sensor is dead"));
         yellowTemperature = greenTemperature;
     }
-    if (greenTemperature == 85 || greenTemperature == -127) {
+    if (greenTemperature == -127) {
         logging::warning(F("Green sensor is dead"));
         greenTemperature = yellowTemperature;
     }
-    if (yellowTemperature == -127 || greenTemperature == -127) {
+    if (yellowTemperature == -127 && greenTemperature == -127) {
         logging::error(F("Inside sensors are dead"));
         yellowTemperature = greenTemperature = outsideSensor.getTemperature();
     }
-    if (yellowTemperature == -127) {
+    if (outsideTemperature == -127 && yellowTemperature == -127 && greenTemperature == -127) {
         logging::error(F("All temperature sensors are died."));
         return;
     }
@@ -80,7 +80,7 @@ void Greenhouse::loop() {
 
     bool shouldCloseGreenWindow = greenTemperature < closingTemperature && greenTemperature < criticalHighTemperature;
     shouldCloseGreenWindow |= outsideTemperature <= criticalLowTemperature;
-    shouldOpenGreenWindow |= !bool(summerMode);
+    shouldCloseGreenWindow |= !bool(summerMode);
     if (shouldCloseGreenWindow) {
         if (!greenWindow_.isBusy() && millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
             logging::debug(F("stepClose green window"));
