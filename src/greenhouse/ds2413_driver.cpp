@@ -20,8 +20,8 @@ bool Task::operator==(const Task& other) const noexcept {
 
 void Task::loop() {
     if (state_ == STATE_NOT_RUNNING) {
-        if (name_) logging::debug(name_);
-        logging::debug(F("::loop with state NOT RUNNING"));
+        // if (name_) logging::debug(name_);
+        // logging::debug(F("::loop with state NOT RUNNING"));
 
         if (nullptr != beforeRoutine_) {
             (*beforeRoutine_)();
@@ -31,8 +31,8 @@ void Task::loop() {
 
     } else if (state_ == STATE_DELAY) {
 
-        if (name_) logging::debug(name_);
-        logging::debug(F("Task::loop with state DELAY"));
+        // if (name_) logging::debug(name_);
+        // logging::debug(F("Task::loop with state DELAY"));
 
         if (millis() > delayCompleteTime_) {
             if (nullptr != afterRoutine_) {
@@ -43,15 +43,15 @@ void Task::loop() {
 
     } else if (state_ == STATE_COMPLETE) {
 
-        if (name_) logging::debug(name_);
-        logging::debug(F("::loop with state STATE_COMPLETE"));
+        // if (name_) logging::debug(name_);
+        // logging::debug(F("::loop with state STATE_COMPLETE"));
         
         logging::warning(F("DS2413Driver loops over the completed task. Probably unexpected idle."));
     
     } else {
 
-        if (name_) logging::debug(name_);
-        logging::debug(F("::loop with INVALID STATE"));
+        // if (name_) logging::debug(name_);
+        // logging::debug(F("::loop with INVALID STATE"));
         
         logging::error(F("DS2413Driver is broken. Task has invalid state."));
         idle();

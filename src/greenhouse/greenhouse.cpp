@@ -29,15 +29,15 @@ void Greenhouse::loop() {
     int8_t greenTemperature = greenSensor.getTemperature();
     int8_t outsideTemperature = outsideSensor.getTemperature();
     if (yellowTemperature == -127) {
-        logging::warning(F("Yellow sensor is dead"));
+        // logging::warning(F("Yellow sensor is dead"));
         yellowTemperature = greenTemperature;
     }
     if (greenTemperature == -127) {
-        logging::warning(F("Green sensor is dead"));
+        // logging::warning(F("Green sensor is dead"));
         greenTemperature = yellowTemperature;
     }
     if (yellowTemperature == -127 && greenTemperature == -127) {
-        logging::error(F("Inside sensors are dead"));
+        // logging::error(F("Inside sensors are dead"));
         yellowTemperature = greenTemperature = outsideSensor.getTemperature();
     }
     if (outsideTemperature == -127 && yellowTemperature == -127 && greenTemperature == -127) {

@@ -13,6 +13,6 @@ void initOneWire();
 OneWire* getOneWire();
 
 void initDS2413Driver();
-DS2413Driver<5>* getDS2413Driver();
+DS2413Driver<9>* getDS2413Driver();
 
 #endif

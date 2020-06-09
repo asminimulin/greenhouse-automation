@@ -3,7 +3,7 @@
 
 namespace {
     OneWire oneWire;
-    DS2413Driver<5> ds2413Driver;
+    DS2413Driver<9> ds2413Driver;
 }
 
 void initOneWire() {
@@ -16,6 +16,6 @@ OneWire* getOneWire() {
 
 void initDS2413Driver () {}
 
-DS2413Driver<5>* getDS2413Driver() {
+DS2413Driver<9>* getDS2413Driver() {
     return &ds2413Driver;
 }
