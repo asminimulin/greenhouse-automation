@@ -8,8 +8,8 @@ uint8_t Greenhouse::summerMode = true;
 
 Greenhouse::Greenhouse(const GreenhouseConfig& config,
                        uint16_t settingsPosition)
-    : yellowWindow_(openingTime, config.yellowMotorAddress),
-      greenWindow_(openingTime, config.greenMotorAddress),
+    : yellowWindow_(config.openingTime, config.yellowMotorAddress),
+      greenWindow_(config.openingTime, config.greenMotorAddress),
       yellowSensor(config.yellowSensorAddress),
       greenSensor(config.greenSensorAddress),
       outsideSensor(config.outsideSensorAddress),

@@ -54,7 +54,7 @@ class Greenhouse {
   inline uint8_t getStepsCount() const noexcept { return openingSteps; }
 
  private:
-  uint32_t getOneStepTime() const { return MOTOR_OPENING_TIME / openingSteps; }
+  uint32_t getOneStepTime() const { return openingTime / openingSteps; }
 
   Window yellowWindow_;
   Window greenWindow_;
