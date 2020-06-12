@@ -33,20 +33,15 @@ constexpr uint32_t BLOCKER_BLOCK_AFTER_MINUTES = 0;
 constexpr uint16_t EEPROM_FIRST_GREENHOUSE_PROPERTIES_ADDRESS = 200;
 
 // Адреса
-constexpr uint8_t FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8] = {
-    0x28, 0xFF, 0x06, 0xA3, 0x31, 0x18, 0x01, 0x44};
-constexpr uint8_t FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS[8] = {
-    0x28, 0xFF, 0x96, 0xB0, 0x31, 0x18, 0x01, 0x43};
-constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8] = {
-    0x28, 0xFF, 0x06, 0xA3, 0x31, 0x18, 0x01, 0x44};
-constexpr uint8_t FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8] = {
-    0xBA, 0xA5, 0xC4, 0x73, 0x50, 0x05, 0x10, 0xBB};
-constexpr uint8_t FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS[8] = {
-    0xBA, 0xCD, 0xC5, 0x73, 0x50, 0x05, 0x10, 0x14};
+constexpr uint8_t FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8] = {0};
+constexpr uint8_t FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS[8] = {0};
+constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8] = {0};
+constexpr uint8_t FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8] = {0};
+constexpr uint8_t FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS[8] = {0};
 constexpr uint8_t FIRST_GREENHOUSE_VENT_ADDRESS[8] = {0};
-constexpr uint32_t FIRST_GREENHOUSE_OPENING_TIME = 38LU * 1000LU;
-constexpr uint32_t FIRST_GREENHOUSE_TEMPERATURE_INNERCY_DELAY =
-    4LU * 60LU * 1000LU;
+
+constexpr uint32_t FIRST_GREENHOUSE_OPENING_TIME = 0;
+constexpr uint32_t FIRST_GREENHOUSE_TEMPERATURE_INNERCY_DELAY = 0;
 
 /*****************************************************************/
 
@@ -62,8 +57,7 @@ constexpr uint8_t SECOND_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8] = {0};
 constexpr uint8_t SECOND_GREENHOUSE_GREEN_MOTOR_ADDRESS[8] = {0};
 constexpr uint8_t SECOND_GREENHOUSE_VENT_ADDRESS[8] = {0};
 constexpr uint32_t SECOND_GREENHOUSE_OPENING_TIME = 0;
-constexpr uint32_t SECOND_GREENHOUSE_TEMPERATURE_INNERCY_DELAY =
-    4LU * 60LU * 1000LU;
+constexpr uint32_t SECOND_GREENHOUSE_TEMPERATURE_INNERCY_DELAY = 0;
 
 /*****************************************************************/
 
