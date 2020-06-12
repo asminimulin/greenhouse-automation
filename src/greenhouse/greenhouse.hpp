@@ -13,6 +13,8 @@ struct GreenhouseConfig {
   DeviceAddress yellowMotorAddress;
   DeviceAddress greenMotorAddress;
   DeviceAddress ventAddress;
+  uint32_t openingTime;
+  uint32_t temperatureInnercyDelay;
 };
 
 class Greenhouse {
@@ -62,10 +64,15 @@ class Greenhouse {
   DS2413 vent_;
 
   // Configurable properties
+  //   User available
   int8_t openingTemperature = 24;
   int8_t closingTemperature = 20;
   uint8_t openingSteps = 6;
   static uint8_t summerMode;
+
+  // Not user avialable
+  uint32_t openingTime = 40LU * 1000LU;
+  uint32_t temperatureInnercyDelay = 0.25 * 60LU * 1000LU;
 
   // Motor
  private:
@@ -77,8 +84,6 @@ class Greenhouse {
   static constexpr int8_t outsideMotorEnablingTemperature = 15;
   static constexpr int8_t criticalHighTemperature = 35;
   static constexpr int8_t criticalLowTemperature = 15;
-  static constexpr uint32_t temperatureInnercyDelay = 0.25 * 60LU * 1000LU;
-  static constexpr uint32_t openingTime = MOTOR_OPENING_TIME;
 
   // EEPROM specific
  private:

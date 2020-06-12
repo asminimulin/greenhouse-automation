@@ -13,7 +13,9 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config,
       yellowSensor(config.yellowSensorAddress),
       greenSensor(config.greenSensorAddress),
       outsideSensor(config.outsideSensorAddress),
-      vent_(config.ventAddress) {
+      vent_(config.ventAddress),
+      openingTime(config.openingTime),
+      temperatureInnercyDelay(config.temperatureInnercyDelay) {
   settingsPosition_ = settingsPosition;
   openingSteps = 6;
   openingTemperature = 24;

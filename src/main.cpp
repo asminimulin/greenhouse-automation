@@ -100,6 +100,8 @@ Greenhouse buildFirstGreenhouse() {
   memcpy(config.yellowMotorAddress, FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS, 8);
   memcpy(config.greenMotorAddress, FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS, 8);
   memcpy(config.ventAddress, FIRST_GREENHOUSE_VENT_ADDRESS, 8);
+  config.openingTime = FIRST_GREENHOUSE_OPENING_TIME;
+  config.temperatureInnercyDelay = FIRST_GREENHOUSE_TEMPERATURE_INNERCY_DELAY;
   return Greenhouse(config, EEPROM_FIRST_GREENHOUSE_PROPERTIES_ADDRESS);
 }
 
@@ -113,6 +115,8 @@ Greenhouse buildSecondGreenhouse() {
   memcpy(config.yellowMotorAddress, SECOND_GREENHOUSE_YELLOW_MOTOR_ADDRESS, 8);
   memcpy(config.greenMotorAddress, SECOND_GREENHOUSE_GREEN_MOTOR_ADDRESS, 8);
   memcpy(config.ventAddress, SECOND_GREENHOUSE_VENT_ADDRESS, 8);
+  config.openingTime = SECOND_GREENHOUSE_OPENING_TIME;
+  config.temperatureInnercyDelay = SECOND_GREENHOUSE_TEMPERATURE_INNERCY_DELAY;
   return Greenhouse(config, EEPROM_SECOND_GREENHOUSE_PROPERTIES_ADDRESS);
 }
 
