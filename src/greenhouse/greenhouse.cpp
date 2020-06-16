@@ -22,6 +22,10 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config,
   closingTemperature = 20;
 }
 
+bool Greenhouse::begin() {
+  return yellowWindow_.begin() && greenWindow_.begin();
+}
+
 void Greenhouse::loop() {
   summerMode &= 1;
   yellowWindow_.loop();

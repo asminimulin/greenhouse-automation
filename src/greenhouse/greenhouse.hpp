@@ -30,6 +30,7 @@ class Greenhouse {
 
  public:
   Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition);
+  bool begin();
   void loadSettings();
   void saveSettings();
   void loop();

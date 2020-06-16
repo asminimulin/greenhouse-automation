@@ -39,42 +39,72 @@ void setup() {
 
   skipEspTrashWriting();
 
-  if (ENABLE_DEBUG_OUTPUT) {
-    logging::setup(logging::DEBUG, &Serial);
-  } else {
-    logging::setup(logging::NOTHING, &Serial);
-  }
+  // if (ENABLE_DEBUG_OUTPUT) {
+  logging::setup(logging::DEBUG, &Serial);
+  // } else {
+  // logging::setup(logging::NOTHING, &Serial);
+  // }
+  // logging::setup(logging::ERROR, &Serial);
 
+  /*
+   * Initializing blocking system.
+   */
+  logging::info(F("Initializing blocking system..."));
   ns_blocker::init();
-  if (ns_blocker::isBlocked()) {
-    notifySystemBlocked();
-    idle();
-  }
+  logging::info(F("Blocking system is ready.\n"));
 
+  /*
+   * Initializing 1-Wire bus
+   */
+  logging::info(F("Initializing 1-Wire bus..."));
   initOneWire();
+  logging::info(F("1-Wire bus is ready."));
 
+  logging::info(F("Initializing greenhouse..."));
   firstGreenhouse.loadSettings();
-  if (HAS_SECOND_GREENHOUSE) secondGreenhouse.loadSettings();
+  logging::info(F("Greenhouse is ready."));
 
+  logging::info(F("Initializing ds18b20 protocol implementation..."));
   ns_ds18b20::init();
-  logging::info(F("ds18b20 is ready ready"));
+  logging::info(F("ds18b20 protocol is ready to use."));
 
+  logging::info(F("Initializing menu..."));
   ns_menu::init();
   logging::info(F("menu is ready"));
 
+  logging::info(F("Initializing screen..."));
   ns_screen::init();
   logging::info(F("screen is ready"));
 
+  logging::info(F("Initializing encoder..."));
   ns_encoder::init();
   logging::info(F("encoder is ready"));
 
-  buildFirstGreenhouseMenu();
-  if (HAS_SECOND_GREENHOUSE) buildSecondGreenhouseMenu();
+  logging::info(F("Building menu"));
   buildScreenMenu();
   buildSummerModeMenu();
-  logging::info(F("Greenhouses are ready"));
+  buildFirstGreenhouseMenu();
+  logging::info(F("Menu is ready"));
 
-  logging::info(F("Setup successfully"));
+  /*
+   * Estabilishing connection with esp8266 module
+   */
+  logging::info(F("Estabilishing connection with esp8266 module"));
+  if (espConnector.begin()) {
+    logging::info(F("Connection with esp8266 successfully estabilished"));
+  } else {
+    logging::error(F("Failed to estabilish connection with esp8266"));
+  }
+
+  logging::info(F("System is ready."));
+
+  logging::info(F("Starting greenhouse..."));
+  if (firstGreenhouse.begin()) {
+    logging::info(F("Greenhouse successfully started."));
+  } else {
+    logging::error(F("Failed to start greenhouse."));
+    idle();
+  }
 }
 
 void loop() {
@@ -83,7 +113,6 @@ void loop() {
     idle();
   }
   firstGreenhouse.loop();
-  if (HAS_SECOND_GREENHOUSE) secondGreenhouse.loop();
   refreshScreen();
   ns_screen::loop();
   espConnector.loop();
@@ -194,34 +223,34 @@ void buildFirstGreenhouseMenu() {
   ns_menu::addItem(item);
 }
 
-void buildSecondGreenhouseMenu() {
-  MenuItem item;
-  item.parent = ns_menu::getRoot();
-  item.name = F("Greenhouse 2");
-  item.isLeaf = false;
-  auto rootId = ns_menu::addItem(item);
-
-  item.name = F("Opening Temp");
-  item.parent = rootId;
-  item.value = &secondGreenhouse.openingTemperature;
-  item.isLeaf = true;
-  item.validator = validateSecondOpeningTemperature;
-  ns_menu::addItem(item);
-
-  item.name = F("Closing Temp");
-  item.parent = rootId;
-  item.value = &secondGreenhouse.closingTemperature;
-  item.isLeaf = true;
-  item.validator = validateSecondClosingTemperature;
-  ns_menu::addItem(item);
-
-  item.name = F("Opening steps");
-  item.parent = rootId;
-  item.value = reinterpret_cast<int8_t*>(&secondGreenhouse.openingSteps);
-  item.isLeaf = true;
-  item.validator = validateSecondOpeningSteps;
-  ns_menu::addItem(item);
-}
+// void buildSecondGreenhouseMenu() {
+//   MenuItem item;
+//   item.parent = ns_menu::getRoot();
+//   item.name = F("Greenhouse 2");
+//   item.isLeaf = false;
+//   auto rootId = ns_menu::addItem(item);
+//
+//   item.name = F("Opening Temp");
+//   item.parent = rootId;
+//   item.value = &secondGreenhouse.openingTemperature;
+//   item.isLeaf = true;
+//   item.validator = validateSecondOpeningTemperature;
+//   ns_menu::addItem(item);
+//
+//   item.name = F("Closing Temp");
+//   item.parent = rootId;
+//   item.value = &secondGreenhouse.closingTemperature;
+//   item.isLeaf = true;
+//   item.validator = validateSecondClosingTemperature;
+//   ns_menu::addItem(item);
+//
+//   item.name = F("Opening steps");
+//   item.parent = rootId;
+//   item.value = reinterpret_cast<int8_t*>(&secondGreenhouse.openingSteps);
+//   item.isLeaf = true;
+//   item.validator = validateSecondOpeningSteps;
+//   ns_menu::addItem(item);
+// }
 
 void buildScreenMenu() {
   MenuItem item;
