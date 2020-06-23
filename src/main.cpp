@@ -186,27 +186,6 @@ void ns_encoder::decrementPress() {
   display.resetInterruptTimer();
 }
 
-// void refreshDisplay() {
-//   char buf[3][3];
-//   if (!ns_menu::isEnabled()) {
-//     char* firstRow = display.getWritableBuffer(0);
-//     char* secondRow = display.getWritableBuffer(1);
-//     Greenhouse::getTempRepresentation(greenhouse.getYellowTemperature(),
-//                                       buf[0]);
-//     Greenhouse::getTempRepresentation(greenhouse.getGreenTemperature(),
-//     buf[1]);
-//     Greenhouse::getTempRepresentation(greenhouse.getOutsideTemperature(),
-//                                       buf[2]);
-//     sprintf(firstRow, "Y:%s G:%s Out:%s", buf[0], buf[1], buf[2]);
-//     sprintf(secondRow, "Y:%s G:%s Sum:%s", buf[0], buf[1],
-//             (greenhouse.getSummerMode() ? "ON" : "OFF"));
-//   } else {
-//     char* firstRow = display.getWritableBuffer(0);
-//     char* secondRow = display.getWritableBuffer(1);
-//     ns_menu::renderMenu(firstRow, secondRow);
-//   }
-// }
-
 void buildGreenhouseMenu() {
   MenuItem item;
   item.parent = ns_menu::getRoot();
@@ -308,7 +287,7 @@ void espHandle(Stream* stream) {
     stream->write(uint8_t(greenhouse.getClosingTemperature()));
     stream->write(greenhouse.getStepsCount());
   } else {
-    /* Unsupported comand -> do nothing */
+    /* Unsupported command -> do nothing */
     logging::error(F("Unsupported command"));
   }
 }
