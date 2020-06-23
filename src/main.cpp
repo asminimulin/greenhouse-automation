@@ -116,21 +116,16 @@ void setup() {
 }
 
 void loop() {
-  logging2::debug() << F("loop()");
   if (ns_blocker::isBlocked()) {
     notifySystemBlocked();
     idle();
   }
-  logging2::debug() << F("Runnig greenhouse.loop()");
   greenhouse.loop();
-  logging2::debug() << F("Runnig espConnector.loop()");
   espConnector.loop();
-  logging2::debug() << F("Runnig ns_blocker::upadateTime()");
   ns_blocker::updateTime();
-  logging2::debug() << F("Runnig ds2413Driver.loop()");
   getDS2413Driver()->loop();
-  logging2::debug() << F("display.loop()");
   display.loop();
+  ns_ds18b20::refreshTemperatures();
 }
 
 Greenhouse buildGreenhouse() {
@@ -186,12 +181,24 @@ void ns_encoder::decrementPress() {
   display.resetInterruptTimer();
 }
 
+void ventModeRepresenter(int8_t value, char* buffer) {
+  if (value == Greenhouse::VentMode::VENT_DISABLE) {
+    strcpy_P(buffer, reinterpret_cast<PGM_P>(F("OFF")));
+  } else if (value == Greenhouse::VENT_ENABLE) {
+    strcpy_P(buffer, reinterpret_cast<PGM_P>(F("ON")));
+  } else if (value == Greenhouse::VENT_AUTO) {
+    strcpy_P(buffer, reinterpret_cast<PGM_P>(F("AUTO")));
+  } else {
+    logging2::error() << F("ventModeRepresnter got invalid value.");
+    idle();
+  }
+}
+
+bool ventModeValidator(int8_t value) { return value >= 0 && value < 3; }
+
 void buildGreenhouseMenu() {
   MenuItem item;
-  item.parent = ns_menu::getRoot();
-  item.name = F("Greenhouse");
-  item.isLeaf = false;
-  auto rootId = ns_menu::addItem(item);
+  auto rootId = ns_menu::getRoot();
 
   item.name = F("Opening Temp");
   item.parent = rootId;
@@ -213,6 +220,15 @@ void buildGreenhouseMenu() {
   item.isLeaf = true;
   item.validator = validateOpeningSteps;
   ns_menu::addItem(item);
+
+  item.name = F("Vent mode");
+  item.parent = rootId;
+  item.value = reinterpret_cast<int8_t*>(&greenhouse.ventMode_);
+  item.isLeaf = true;
+  item.represent = ventModeRepresenter;
+  item.hasCustomRepresenation = true;
+  item.validator = ventModeValidator;
+  ns_menu::addItem(item);
 }
 
 void buildDisplayMenu() {
@@ -223,6 +239,7 @@ void buildDisplayMenu() {
   item.value = reinterpret_cast<int8_t*>(&display.screenLightingSetting_);
   item.hasCustomRepresenation = true;
   item.represent = ns_display::screenLightSettingRepresenter;
+  item.validator = ns_display::screenLightSettingValidator;
   ns_menu::addItem(item);
 }
 
@@ -239,7 +256,7 @@ void buildSummerModeMenu() {
   item.parent = ns_menu::getRoot();
   item.name = F("Summer mode");
   item.isLeaf = true;
-  item.value = reinterpret_cast<int8_t*>(&Greenhouse::summerMode);
+  item.value = reinterpret_cast<int8_t*>(&(greenhouse.summerMode));
   item.hasCustomRepresenation = true;
   item.represent = repsentSummerMode;
   ns_menu::addItem(item);
@@ -293,7 +310,7 @@ void espHandle(Stream* stream) {
 }
 
 void skipEspTrashWriting() {
-  delay(5000);
+  delay(2000);
   while (Serial.available()) {
     Serial.read();
   }

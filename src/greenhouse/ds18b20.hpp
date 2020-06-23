@@ -21,6 +21,7 @@ class DS18B20 {
   virtual int8_t getTemperature();
 
  private:
+  uint32_t lastUpdate_;
   int8_t cachedTemperature;
   DeviceAddress address_;
 };

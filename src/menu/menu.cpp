@@ -2,10 +2,11 @@
 
 #include "config.hpp"
 #include "idle.hpp"
+#include "logging/logging2.hpp"
 
 namespace {
 
-static constexpr uint8_t menuItemsCount = 7;
+static constexpr uint8_t menuItemsCount = 9;
 static MenuItem menuItems[menuItemsCount];
 static uint8_t menuItemsUsed;
 static uint8_t currentItemId;
@@ -157,11 +158,11 @@ void handleIncrementPress() {
 }
 
 void handleDecrementPress() {
-  if (menuItems[currentItemId].isLeaf && menuItems[currentItemId].isActivated) {
-    if (!menuItems[currentItemId].validator ||
-        menuItems[currentItemId].validator(menuItems[currentItemId].ownValue)) {
-      menuItems[currentItemId].isActivated = false;
-      (*menuItems[currentItemId].value) = menuItems[currentItemId].ownValue;
+  MenuItem& item = menuItems[currentItemId];
+  if (item.isLeaf && item.isActivated) {
+    if (!item.validator || item.validator(item.ownValue)) {
+      item.isActivated = false;
+      *(item.value) = item.ownValue;
       greenhouse.saveSettings();
     }
     return;

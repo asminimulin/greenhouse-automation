@@ -7,7 +7,10 @@
 
 namespace ns_display {
 void screenLightSettingRepresenter(int8_t value, char* row);
+inline bool screenLightSettingValidator(int8_t value) {
+  return value >= 0 && value < 3;
 }
+}  // namespace ns_display
 
 class Display {
  public:

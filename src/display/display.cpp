@@ -25,25 +25,18 @@ namespace ns_display {
 void screenLightSettingRepresenter(int8_t value, char* row) {
   value %= 3;
   char buffer[16];
-  auto* on_ = reinterpret_cast<const char*>(F("Light on"));
-  auto* off_ = reinterpret_cast<const char*>(F("Light off"));
-  auto* auto_ = reinterpret_cast<const char*>(F("Light auto"));
-  for (int i = 0;; ++i) {
-    char c;
-    if (value == Display::LIGHT_ON) {
-      c = pgm_read_byte(i + on_);
-    } else if (value == Display::LIGHT_OFF) {
-      c = pgm_read_byte(i + off_);
-    } else {
-      c = pgm_read_byte(i + auto_);
-    }
-    buffer[i] = c;
-    if (c == '\0') {
-      break;
-    }
+  auto* on_ = reinterpret_cast<PGM_P>(F("Light on"));
+  auto* off_ = reinterpret_cast<PGM_P>(F("Light off"));
+  auto* auto_ = reinterpret_cast<PGM_P>(F("Light auto"));
+  if (value == Display::LIGHT_ON) {
+    strcpy_P(buffer, on_);
+  } else if (value == Display::LIGHT_OFF) {
+    strcpy_P(buffer, off_);
+  } else {
+    strcpy_P(buffer, auto_);
   }
   sprintf(row, "%s", buffer);
-}
+}  // namespace ns_display
 
 }  // namespace ns_display
 

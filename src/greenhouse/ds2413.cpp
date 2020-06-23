@@ -20,8 +20,6 @@ bool DS2413::setState(uint8_t state) {
     logging2::warning() << F("Setting the same state on ds2413");
     return false;
   }
-  logging2::debug() << F("ds2413 set state:") << int(state) << F("on address")
-                    << OneWireAddressHolder(address_);
   state_ = state;
   state |= 0xFC;
   OneWire* ow = getOneWire();

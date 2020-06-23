@@ -3,8 +3,7 @@
 #include <EEPROM.h>
 
 #include "logging/logging.hpp"
-
-uint8_t Greenhouse::summerMode = true;
+#include "logging/logging2.hpp"
 
 Greenhouse::Greenhouse(const GreenhouseConfig& config,
                        uint16_t settingsPosition)
@@ -20,6 +19,8 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config,
   openingSteps = 6;
   openingTemperature = 24;
   closingTemperature = 20;
+  summerMode = true;
+  ventMode_ = VENT_AUTO;
 }
 
 bool Greenhouse::begin() {
@@ -60,7 +61,6 @@ void Greenhouse::loop() {
   if (shouldOpenYellowWindow) {
     if (!yellowWindow_.isBusy() &&
         millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
-      logging::debug(F("stepOpen yellow window"));
       yellowWindow_.stepOpen(getOneStepTime());
       yellowWindowStateChangedAt = millis();
     }
@@ -74,7 +74,6 @@ void Greenhouse::loop() {
   if (shouldOpenGreenWindow) {
     if (!greenWindow_.isBusy() &&
         millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
-      logging::debug(F("stepOpen green window"));
       greenWindow_.stepOpen(getOneStepTime());
       greenWindowStateChangedAt = millis();
     }
@@ -87,7 +86,6 @@ void Greenhouse::loop() {
   if (shouldCloseYellowWindow) {
     if (!yellowWindow_.isBusy() &&
         millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
-      logging::debug(F("stepClose yellow window"));
       yellowWindow_.stepClose(getOneStepTime());
       yellowWindowStateChangedAt = millis();
     }
@@ -100,19 +98,24 @@ void Greenhouse::loop() {
   if (shouldCloseGreenWindow) {
     if (!greenWindow_.isBusy() &&
         millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
-      logging::debug(F("stepClose green window"));
       greenWindow_.stepClose(getOneStepTime());
       greenWindowStateChangedAt = millis();
     }
   }
 
   int averageTemperature = (int(yellowTemperature) + int(greenTemperature)) / 2;
-  if (averageTemperature >= ventOnTemperature) {
+  bool shouldOnVent =
+      averageTemperature >= ventOnTemperature && ventMode_ == VENT_AUTO;
+  shouldOnVent |= ventMode_ == VENT_ENABLE;
+  bool shouldOffVent =
+      ventMode_ == VENT_AUTO && averageTemperature <= ventOnTemperature - 2;
+  // NOTE: 2 is histeresis value for vent ON/OFF
+  // logging2::debug() << F("vent mode =") << int(ventMode_);
+  shouldOffVent |= ventMode_ == VENT_DISABLE;
+  if (shouldOnVent) {
     if (vent_.getState() != VentState::VENT_ON)
       vent_.setState(VentState::VENT_ON);
-  } else if (averageTemperature <=
-             ventOnTemperature -
-                 2) {  // NOTE: 2 is histeresis value for vent ON/OFF
+  } else if (shouldOffVent) {
     if (vent_.getState() != VentState::VENT_OFF)
       vent_.setState(VentState::VENT_OFF);
   }
@@ -122,14 +125,17 @@ void Greenhouse::loadSettings() {
   auto position = settingsPosition_;
   if (EEPROM.read(position) == HAS_VALID_DATA) {
     logging::info(F("Loading greenhouse settings"));
-    position++;
+    position += sizeof(HAS_VALID_DATA);
     EEPROM.get(position, openingTemperature);
-    position++;
+    position += sizeof(openingTemperature);
     EEPROM.get(position, closingTemperature);
-    position++;
+    position += sizeof(closingTemperature);
     EEPROM.get(position, openingSteps);
     position += sizeof(openingSteps);
     EEPROM.get(position, summerMode);
+    position += sizeof(summerMode);
+    EEPROM.get(position, ventMode_);
+    position += sizeof(ventMode_);
   }
   logging::info(F("Using default settings"));
 }
@@ -138,14 +144,17 @@ void Greenhouse::saveSettings() {
   logging::info(F("Save greenhouse settings"));
   auto position = settingsPosition_;
   EEPROM.write(position, HAS_VALID_DATA);
-  position++;
+  position += sizeof(HAS_VALID_DATA);
   EEPROM.put(position, openingTemperature);
-  position++;
+  position += sizeof(openingTemperature);
   EEPROM.put(position, closingTemperature);
-  position++;
+  position += sizeof(closingTemperature);
   EEPROM.put(position, openingSteps);
   position += sizeof(openingSteps);
   EEPROM.put(position, summerMode);
+  position += sizeof(summerMode);
+  EEPROM.put(position, ventMode_);
+  position += sizeof(ventMode_);
 }
 
 void Greenhouse::getTempRepresentation(int8_t temperature, char* buffer) {
