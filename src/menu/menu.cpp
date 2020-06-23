@@ -5,7 +5,7 @@
 
 namespace {
 
-static constexpr uint8_t menuItemsCount = 15;
+static constexpr uint8_t menuItemsCount = 7;
 static MenuItem menuItems[menuItemsCount];
 static uint8_t menuItemsUsed;
 static uint8_t currentItemId;
@@ -180,46 +180,22 @@ uint8_t getParent() { return menuItems[currentItemId].parent; }
 uint8_t getCurrentMenuItemId() { return currentItemId; }
 
 void renderMenu(char* firstRow, char* secondRow) {
-  if (menuItems[currentItemId].isLeaf && menuItems[currentItemId].isActivated) {
-    const char* fstring =
-        reinterpret_cast<const char*>(menuItems[currentItemId].name);
-    for (int i = 0;; ++i) {
-      if (i == LCD_COLUMNS) {
-        firstRow[i] = '\0';
-        break;
-      }
-      char c = pgm_read_byte(fstring + i);
-      firstRow[i] = c;
-      if (c == '\0') {
-        break;
-      }
-    }
-    if (menuItems[currentItemId].hasCustomRepresenation) {
-      menuItems[currentItemId].represent(menuItems[currentItemId].ownValue,
-                                         secondRow);
+  MenuItem& item = menuItems[currentItemId];
+  if (item.isLeaf && item.isActivated) {
+    auto fstring = reinterpret_cast<PGM_P>(item.name);
+    strcpy_P(firstRow, fstring);
+    if (item.hasCustomRepresenation) {
+      item.represent(item.ownValue, secondRow);
     } else {
-      sprintf(secondRow, "%d*", menuItems[currentItemId].ownValue);
+      sprintf(secondRow, "%d*", item.ownValue);
     }
   } else {
-    const char* fstring =
-        reinterpret_cast<const char*>(menuItems[getParent()].name);
-    for (int i = 0;; ++i) {
-      char c = pgm_read_byte(fstring + i);
-      firstRow[i] = c;
-      if (c == '\0') {
-        break;
-      }
-    }
-    fstring = reinterpret_cast<const char*>(menuItems[currentItemId].name);
+    auto fstring = reinterpret_cast<PGM_P>(menuItems[getParent()].name);
+    strcpy_P(firstRow, fstring);
+    fstring = reinterpret_cast<const char*>(item.name);
     int index = 0;
     index = sprintf(secondRow, "%d.", childPosition + 1);
-    for (int i = 0;; ++i) {
-      char c = pgm_read_byte(fstring + i);
-      secondRow[index++] = c;
-      if (c == '\0') {
-        break;
-      }
-    }
+    strcpy_P(&secondRow[index], fstring);
   }
 }
 
