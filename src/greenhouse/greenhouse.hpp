@@ -18,14 +18,10 @@ struct GreenhouseConfig {
 };
 
 class Greenhouse {
-  friend void buildFirstGreenhouseMenu();
-  friend void buildSecondGreenhouseMenu();
-  friend bool validateFirstOpeningTemperature(int8_t temp);
-  friend bool validateFirstClosingTemperature(int8_t temp);
-  friend bool validateFirstOpeningSteps(int8_t steps);
-  friend bool validateSecondOpeningTemperature(int8_t temp);
-  friend bool validateSecondClosingTemperature(int8_t temp);
-  friend bool validateSecondOpeningSteps(int8_t steps);
+  friend void buildGreenhouseMenu();
+  friend bool validateOpeningTemperature(int8_t temp);
+  friend bool validateClosingTemperature(int8_t temp);
+  friend bool validateOpeningSteps(int8_t steps);
   friend void buildSummerModeMenu();
 
  public:
@@ -35,9 +31,9 @@ class Greenhouse {
   void saveSettings();
   void loop();
   static void getTempRepresentation(int8_t temperature, char* buffer);
-  int8_t getOutsideTemperature() { return outsideSensor.getTemperature(); }
-  int8_t getYellowTemperature() { return yellowSensor.getTemperature(); }
-  int8_t getGreenTemperature() { return greenSensor.getTemperature(); }
+  int8_t getOutsideTemperature() { return outsideSensor_.getTemperature(); }
+  int8_t getYellowTemperature() { return yellowSensor_.getTemperature(); }
+  int8_t getGreenTemperature() { return greenSensor_.getTemperature(); }
   bool getSummerMode() const noexcept { return bool(summerMode & 1); }
   void setSummeMode(bool enabled) noexcept { summerMode = enabled; }
   inline uint8_t getYellowPerCent() const noexcept {
@@ -59,9 +55,9 @@ class Greenhouse {
 
   Window yellowWindow_;
   Window greenWindow_;
-  DS18B20 yellowSensor;
-  DS18B20 greenSensor;
-  DS18B20 outsideSensor;
+  DS18B20 yellowSensor_;
+  DS18B20 greenSensor_;
+  DS18B20 outsideSensor_;
   DS2413 vent_;
 
   // Configurable properties
@@ -71,7 +67,7 @@ class Greenhouse {
   uint8_t openingSteps = 6;
   static uint8_t summerMode;
 
-  // Not user avialable
+  //  Not user avialable
   uint32_t openingTime = 40LU * 1000LU;
   uint32_t temperatureInnercyDelay = 0.25 * 60LU * 1000LU;
 

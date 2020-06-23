@@ -81,6 +81,7 @@ void selectParent() {
     return;
   }
   currentItemId = menuItems[currentItemId].parent;
+  refreshChildPosition();
 }
 
 }  // namespace
@@ -119,8 +120,11 @@ uint8_t addItem(const MenuItem& newItem) {
 }
 
 void handleIncrement() {
-  if (menuItems[currentItemId].isLeaf && menuItems[currentItemId].isActivated) {
-    menuItems[currentItemId].ownValue++;
+  MenuItem& item = menuItems[currentItemId];
+  if (item.isLeaf && item.isActivated) {
+    if (!item.validator || item.validator(item.ownValue + 1)) {
+      item.ownValue++;
+    }
     return;
   }
   if (isEnabled()) {
@@ -129,8 +133,11 @@ void handleIncrement() {
 }
 
 void handleDecrement() {
-  if (menuItems[currentItemId].isLeaf && menuItems[currentItemId].isActivated) {
-    menuItems[currentItemId].ownValue--;
+  MenuItem& item = menuItems[currentItemId];
+  if (item.isLeaf && item.isActivated) {
+    if (!item.validator || item.validator(item.ownValue - 1)) {
+      item.ownValue--;
+    }
     return;
   }
   if (isEnabled()) {
@@ -155,8 +162,7 @@ void handleDecrementPress() {
         menuItems[currentItemId].validator(menuItems[currentItemId].ownValue)) {
       menuItems[currentItemId].isActivated = false;
       (*menuItems[currentItemId].value) = menuItems[currentItemId].ownValue;
-      firstGreenhouse.saveSettings();
-      secondGreenhouse.saveSettings();
+      greenhouse.saveSettings();
     }
     return;
   }

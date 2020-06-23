@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-// ONEWIRE
-constexpr uint8_t ONE_WIRE_PIN = 5;
-
 /************************* Блокировщик ***********************/
 /* Теплица перестанет работать, когда отработает в течение такого времени:
  * BLOCKER_BLOCK_SYSTERM_AFTER_TIME = BLOCKER_BLOCK_AFTER_MONTHS *
@@ -30,40 +27,33 @@ constexpr uint32_t BLOCKER_BLOCK_AFTER_MINUTES = 0;
 
 /************************* Первая теплица **********************/
 // Адрес настроек в EEPROM
-constexpr uint16_t EEPROM_FIRST_GREENHOUSE_PROPERTIES_ADDRESS = 200;
+constexpr uint16_t EEPROM_PROPERTIES_ADDRESS = 200;
 
 // Адреса
-constexpr uint8_t FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8] = {0};
-constexpr uint8_t FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS[8] = {0};
-constexpr uint8_t FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8] = {0};
-constexpr uint8_t FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8] = {0};
-constexpr uint8_t FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS[8] = {0};
-constexpr uint8_t FIRST_GREENHOUSE_VENT_ADDRESS[8] = {0};
 
-constexpr uint32_t FIRST_GREENHOUSE_OPENING_TIME = 0;
-constexpr uint32_t FIRST_GREENHOUSE_TEMPERATURE_INNERCY_DELAY = 0;
+constexpr uint8_t YELLOW_SENSOR_ADDRESS[8] = {0x28, 0xFF, 0x06, 0xA3,
+                                              0x31, 0x18, 0x01, 0x44};
+constexpr uint8_t GREEN_SENSOR_ADDRESS[8] = {0x28, 0xFF, 0x96, 0xB0,
+                                             0x31, 0x18, 0x01, 0x43};
+constexpr uint8_t OUTSIDE_SENSOR_ADDRESS[8] = {0x28, 0xB9, 0x8B, 0x16,
+                                               0xA8, 0x01, 0x3C, 0x0F};
+constexpr uint8_t YELLOW_MOTOR_ADDRESS[8] = {0xBA, 0xCD, 0xC5, 0x73,
+                                             0x50, 0x05, 0x10, 0x14};
+constexpr uint8_t GREEN_MOTOR_ADDRESS[8] = {0xBA, 0x59, 0xD4, 0x73,
+                                            0x50, 0x05, 0x10, 0xC8};
+constexpr uint8_t VENT_ADDRESS[8] = {0};
 
-/*****************************************************************/
-
-/************************* Вторая теплица **********************/
-constexpr bool HAS_SECOND_GREENHOUSE = false;
-constexpr uint16_t EEPROM_SECOND_GREENHOUSE_PROPERTIES_ADDRESS = 300;
-
-// Адреса
-constexpr uint8_t SECOND_GREENHOUSE_YELLOW_SENSOR_ADDRESS[8] = {0};
-constexpr uint8_t SECOND_GREENHOUSE_GREEN_SENSOR_ADDRESS[8] = {0};
-constexpr uint8_t SECOND_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS[8] = {0};
-constexpr uint8_t SECOND_GREENHOUSE_YELLOW_MOTOR_ADDRESS[8] = {0};
-constexpr uint8_t SECOND_GREENHOUSE_GREEN_MOTOR_ADDRESS[8] = {0};
-constexpr uint8_t SECOND_GREENHOUSE_VENT_ADDRESS[8] = {0};
-constexpr uint32_t SECOND_GREENHOUSE_OPENING_TIME = 0;
-constexpr uint32_t SECOND_GREENHOUSE_TEMPERATURE_INNERCY_DELAY = 0;
+constexpr uint32_t OPENING_TIME = 4LU * 1000LU;
+constexpr uint32_t TEMPERATURE_INNERCY_DELAY = 0.5 * 60LU * 1000LU;
 
 /*****************************************************************/
 
 // Моторы
 // Время работы привода от состояния полность закрыто до полностью открыто
 constexpr uint32_t MOTOR_OPENING_TIME = 4 * 1000lu;
+
+// ONEWIRE
+constexpr uint8_t ONE_WIRE_PIN = 5;
 
 // Энкодер
 constexpr uint8_t ENCODER_INTERRUPT_PIN = 2;

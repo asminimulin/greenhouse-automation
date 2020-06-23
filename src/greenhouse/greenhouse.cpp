@@ -10,9 +10,9 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config,
                        uint16_t settingsPosition)
     : yellowWindow_(config.openingTime, config.yellowMotorAddress),
       greenWindow_(config.openingTime, config.greenMotorAddress),
-      yellowSensor(config.yellowSensorAddress),
-      greenSensor(config.greenSensorAddress),
-      outsideSensor(config.outsideSensorAddress),
+      yellowSensor_(config.yellowSensorAddress),
+      greenSensor_(config.greenSensorAddress),
+      outsideSensor_(config.outsideSensorAddress),
       vent_(config.ventAddress),
       openingTime(config.openingTime),
       temperatureInnercyDelay(config.temperatureInnercyDelay) {
@@ -31,9 +31,9 @@ void Greenhouse::loop() {
   yellowWindow_.loop();
   greenWindow_.loop();
 
-  int8_t yellowTemperature = yellowSensor.getTemperature();
-  int8_t greenTemperature = greenSensor.getTemperature();
-  int8_t outsideTemperature = outsideSensor.getTemperature();
+  int8_t yellowTemperature = yellowSensor_.getTemperature();
+  int8_t greenTemperature = greenSensor_.getTemperature();
+  int8_t outsideTemperature = outsideSensor_.getTemperature();
   if (yellowTemperature == -127) {
     // logging::warning(F("Yellow sensor is dead"));
     yellowTemperature = greenTemperature;
@@ -44,7 +44,7 @@ void Greenhouse::loop() {
   }
   if (yellowTemperature == -127 && greenTemperature == -127) {
     // logging::error(F("Inside sensors are dead"));
-    yellowTemperature = greenTemperature = outsideSensor.getTemperature();
+    yellowTemperature = greenTemperature = outsideSensor_.getTemperature();
   }
   if (outsideTemperature == -127 && yellowTemperature == -127 &&
       greenTemperature == -127) {
@@ -53,7 +53,7 @@ void Greenhouse::loop() {
   }
 
   bool shouldOpenYellowWindow =
-      outsideSensor.getTemperature() > outsideMotorEnablingTemperature &&
+      outsideSensor_.getTemperature() > outsideMotorEnablingTemperature &&
       yellowTemperature > openingTemperature;
   shouldOpenYellowWindow &= bool(summerMode);
   shouldOpenYellowWindow |= yellowTemperature >= criticalHighTemperature;
@@ -67,7 +67,7 @@ void Greenhouse::loop() {
   }
 
   bool shouldOpenGreenWindow =
-      outsideSensor.getTemperature() > outsideMotorEnablingTemperature &&
+      outsideSensor_.getTemperature() > outsideMotorEnablingTemperature &&
       greenTemperature > openingTemperature;
   shouldOpenGreenWindow &= bool(summerMode);
   shouldOpenGreenWindow |= greenTemperature >= criticalHighTemperature;

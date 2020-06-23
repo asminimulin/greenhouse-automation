@@ -3,21 +3,14 @@
 
 #include "greenhouse/greenhouse.hpp"
 
-
-extern Greenhouse firstGreenhouse;
-
+extern Greenhouse greenhouse;
 
 // namespace ns_first_greenhouse_validators {
 
-bool validateFirstOpeningTemperature(int8_t temp);
-bool validateFirstClosingTemperature(int8_t temp);
-bool validateFirstOpeningSteps(int8_t steps);
-bool validateSecondOpeningTemperature(int8_t temp);
-bool validateSecondClosingTemperature(int8_t temp);
-bool validateSecondOpeningSteps(int8_t steps);
+bool validateOpeningTemperature(int8_t temp);
+bool validateClosingTemperature(int8_t temp);
+bool validateOpeningSteps(int8_t steps);
 // }
-
-
 
 extern Greenhouse secondGreenhouse;
 

@@ -1,34 +1,43 @@
 #include <Arduino.h>
 
-#include <blocker/blocker.hpp>
-#include <global_singletons.hpp>
-#include <greenhouse/greenhouse.hpp>
-#include <idle.hpp>
-
+#include "blocker/blocker.hpp"
 #include "config.hpp"
 #include "connector/serial_connector.hpp"
+#include "display/display.hpp"
+#include "display/green_window_screen.hpp"
+#include "display/menu_screen.hpp"
+#include "display/outside_screen.hpp"
+#include "display/yellow_window_screen.hpp"
 #include "encoder/encoder.hpp"
+#include "global_singletons.hpp"
 #include "greenhouse/ds2413_driver.hpp"
+#include "greenhouse/greenhouse.hpp"
+#include "idle.hpp"
 #include "logging/logging.hpp"
+#include "logging/logging2.hpp"
 #include "menu/menu.hpp"
 #include "menu/menu_validators.hpp"
-#include "screen/screen.hpp"
+#include "screen_holder.hpp"
 
-void buildFirstGreenhouseMenu();
-void buildSecondGreenhouseMenu();
-void buildScreenMenu();
+void buildGreenhouseMenu();
+void buildDisplayMenu();
 void buildSummerModeMenu();
+Greenhouse buildGreenhouse();
 
-Greenhouse buildFirstGreenhouse();
-Greenhouse buildSecondGreenhouse();
+Greenhouse greenhouse = buildGreenhouse();
 
-Greenhouse firstGreenhouse = buildFirstGreenhouse();
-Greenhouse secondGreenhouse = buildSecondGreenhouse();
+/* Screens */
+static constexpr uint8_t totalScreensCount = 3;
+YellowWindowScreen yellowWindowScreen(&greenhouse);
+GreenWindowScreen greenWindowScreen(&greenhouse);
+OutsideScreen outsideScreen(&greenhouse);
+MenuScreen menuScreen;
+ScreenHolder<totalScreensCount> screenHolder;
+
+Display display(LCD_ADDRESS);
 
 void espHandle(Stream* stream);
 serial_connector::SerialConnector espConnector(&Serial, espHandle);
-
-void refreshScreen();
 
 void skipEspTrashWriting();
 
@@ -39,13 +48,8 @@ void setup() {
 
   skipEspTrashWriting();
 
-  // if (ENABLE_DEBUG_OUTPUT) {
-  logging::setup(logging::DEBUG, &Serial);
-  // } else {
-  // logging::setup(logging::NOTHING, &Serial);
-  // }
-  // logging::setup(logging::ERROR, &Serial);
-
+  logging::setup(logging::NOTHING, &Serial);
+  logging2::init(logging2::NOTHING, &Serial);
   /*
    * Initializing blocking system.
    */
@@ -61,7 +65,7 @@ void setup() {
   logging::info(F("1-Wire bus is ready."));
 
   logging::info(F("Initializing greenhouse..."));
-  firstGreenhouse.loadSettings();
+  greenhouse.loadSettings();
   logging::info(F("Greenhouse is ready."));
 
   logging::info(F("Initializing ds18b20 protocol implementation..."));
@@ -72,18 +76,22 @@ void setup() {
   ns_menu::init();
   logging::info(F("menu is ready"));
 
-  logging::info(F("Initializing screen..."));
-  ns_screen::init();
-  logging::info(F("screen is ready"));
+  logging::info(F("Initializing display..."));
+  screenHolder.registerScreen(&yellowWindowScreen);
+  screenHolder.registerScreen(&greenWindowScreen);
+  screenHolder.registerScreen(&outsideScreen);
+  display.begin();
+  display.setScreen(screenHolder.getActiveScreen());
+  logging::info(F("display is ready"));
 
   logging::info(F("Initializing encoder..."));
   ns_encoder::init();
   logging::info(F("encoder is ready"));
 
   logging::info(F("Building menu"));
-  buildScreenMenu();
+  buildDisplayMenu();
   buildSummerModeMenu();
-  buildFirstGreenhouseMenu();
+  buildGreenhouseMenu();
   logging::info(F("Menu is ready"));
 
   /*
@@ -99,7 +107,7 @@ void setup() {
   logging::info(F("System is ready."));
 
   logging::info(F("Starting greenhouse..."));
-  if (firstGreenhouse.begin()) {
+  if (greenhouse.begin()) {
     logging::info(F("Greenhouse successfully started."));
   } else {
     logging::error(F("Failed to start greenhouse."));
@@ -108,166 +116,142 @@ void setup() {
 }
 
 void loop() {
+  logging2::debug() << F("loop()");
   if (ns_blocker::isBlocked()) {
     notifySystemBlocked();
     idle();
   }
-  firstGreenhouse.loop();
-  refreshScreen();
-  ns_screen::loop();
+  logging2::debug() << F("Runnig greenhouse.loop()");
+  greenhouse.loop();
+  logging2::debug() << F("Runnig espConnector.loop()");
   espConnector.loop();
+  logging2::debug() << F("Runnig ns_blocker::upadateTime()");
   ns_blocker::updateTime();
+  logging2::debug() << F("Runnig ds2413Driver.loop()");
   getDS2413Driver()->loop();
+  logging2::debug() << F("display.loop()");
+  display.loop();
 }
 
-Greenhouse buildFirstGreenhouse() {
+Greenhouse buildGreenhouse() {
   GreenhouseConfig config;
-  memcpy(config.yellowSensorAddress, FIRST_GREENHOUSE_YELLOW_SENSOR_ADDRESS, 8);
-  memcpy(config.greenSensorAddress, FIRST_GREENHOUSE_GREEN_SENSOR_ADDRESS, 8);
-  memcpy(config.outsideSensorAddress, FIRST_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS,
-         8);
-  memcpy(config.yellowMotorAddress, FIRST_GREENHOUSE_YELLOW_MOTOR_ADDRESS, 8);
-  memcpy(config.greenMotorAddress, FIRST_GREENHOUSE_GREEN_MOTOR_ADDRESS, 8);
-  memcpy(config.ventAddress, FIRST_GREENHOUSE_VENT_ADDRESS, 8);
-  config.openingTime = FIRST_GREENHOUSE_OPENING_TIME;
-  config.temperatureInnercyDelay = FIRST_GREENHOUSE_TEMPERATURE_INNERCY_DELAY;
-  return Greenhouse(config, EEPROM_FIRST_GREENHOUSE_PROPERTIES_ADDRESS);
-}
-
-Greenhouse buildSecondGreenhouse() {
-  GreenhouseConfig config;
-  memcpy(config.yellowSensorAddress, SECOND_GREENHOUSE_YELLOW_SENSOR_ADDRESS,
-         8);
-  memcpy(config.greenSensorAddress, SECOND_GREENHOUSE_GREEN_SENSOR_ADDRESS, 8);
-  memcpy(config.outsideSensorAddress, SECOND_GREENHOUSE_OUTSIDE_SENSOR_ADDRESS,
-         8);
-  memcpy(config.yellowMotorAddress, SECOND_GREENHOUSE_YELLOW_MOTOR_ADDRESS, 8);
-  memcpy(config.greenMotorAddress, SECOND_GREENHOUSE_GREEN_MOTOR_ADDRESS, 8);
-  memcpy(config.ventAddress, SECOND_GREENHOUSE_VENT_ADDRESS, 8);
-  config.openingTime = SECOND_GREENHOUSE_OPENING_TIME;
-  config.temperatureInnercyDelay = SECOND_GREENHOUSE_TEMPERATURE_INNERCY_DELAY;
-  return Greenhouse(config, EEPROM_SECOND_GREENHOUSE_PROPERTIES_ADDRESS);
+  memcpy(config.yellowSensorAddress, YELLOW_SENSOR_ADDRESS, 8);
+  memcpy(config.greenSensorAddress, GREEN_SENSOR_ADDRESS, 8);
+  memcpy(config.outsideSensorAddress, OUTSIDE_SENSOR_ADDRESS, 8);
+  memcpy(config.yellowMotorAddress, YELLOW_MOTOR_ADDRESS, 8);
+  memcpy(config.greenMotorAddress, GREEN_MOTOR_ADDRESS, 8);
+  memcpy(config.ventAddress, VENT_ADDRESS, 8);
+  config.openingTime = OPENING_TIME;
+  config.temperatureInnercyDelay = TEMPERATURE_INNERCY_DELAY;
+  return Greenhouse(config, EEPROM_PROPERTIES_ADDRESS);
 }
 
 void ns_encoder::increment() {
-  ns_menu::handleIncrement();
-  ns_screen::resetInterruptTimer();
+  if (ns_menu::isEnabled()) {
+    ns_menu::handleIncrement();
+  } else {
+    screenHolder.next();
+    display.setScreen(screenHolder.getActiveScreen());
+  }
+  display.resetInterruptTimer();
 }
 
 void ns_encoder::decrement() {
-  ns_menu::handleDecrement();
-  ns_screen::resetInterruptTimer();
+  if (ns_menu::isEnabled()) {
+    ns_menu::handleDecrement();
+  } else {
+    screenHolder.previous();
+    display.setScreen(screenHolder.getActiveScreen());
+  }
+  display.resetInterruptTimer();
 }
 
 void ns_encoder::incrementPress() {
   ns_menu::handleIncrementPress();
-  ns_screen::resetInterruptTimer();
+  if (ns_menu::isEnabled()) {
+    display.setScreen(&menuScreen);
+  } else {
+    display.setScreen(screenHolder.getActiveScreen());
+  }
+  display.resetInterruptTimer();
 }
 
 void ns_encoder::decrementPress() {
   ns_menu::handleDecrementPress();
-  ns_screen::resetInterruptTimer();
-}
-
-void refreshScreen() {
-  char buf[3][3];
-  if (!ns_menu::isEnabled()) {
-    char* firstRow = ns_screen::getWritableBuffer(0);
-    char* secondRow = ns_screen::getWritableBuffer(1);
-    Greenhouse::getTempRepresentation(firstGreenhouse.getYellowTemperature(),
-                                      buf[0]);
-    Greenhouse::getTempRepresentation(firstGreenhouse.getGreenTemperature(),
-                                      buf[1]);
-    Greenhouse::getTempRepresentation(firstGreenhouse.getOutsideTemperature(),
-                                      buf[2]);
-    sprintf(firstRow, "Y:%s G:%s Out:%s", buf[0], buf[1], buf[2]);
-    Greenhouse::getTempRepresentation(secondGreenhouse.getYellowTemperature(),
-                                      buf[0]);
-    Greenhouse::getTempRepresentation(secondGreenhouse.getGreenTemperature(),
-                                      buf[1]);
-    sprintf(secondRow, "Y:%s G:%s Sum:%s", buf[0], buf[1],
-            (firstGreenhouse.getSummerMode() ? "ON" : "OFF"));
+  if (ns_menu::isEnabled()) {
+    display.setScreen(&menuScreen);
   } else {
-    char* firstRow = ns_screen::getWritableBuffer(0);
-    char* secondRow = ns_screen::getWritableBuffer(1);
-    ns_menu::renderMenu(firstRow, secondRow);
+    display.setScreen(screenHolder.getActiveScreen());
   }
+  display.resetInterruptTimer();
 }
 
-void buildFirstGreenhouseMenu() {
+// void refreshDisplay() {
+//   char buf[3][3];
+//   if (!ns_menu::isEnabled()) {
+//     char* firstRow = display.getWritableBuffer(0);
+//     char* secondRow = display.getWritableBuffer(1);
+//     Greenhouse::getTempRepresentation(greenhouse.getYellowTemperature(),
+//                                       buf[0]);
+//     Greenhouse::getTempRepresentation(greenhouse.getGreenTemperature(),
+//     buf[1]);
+//     Greenhouse::getTempRepresentation(greenhouse.getOutsideTemperature(),
+//                                       buf[2]);
+//     sprintf(firstRow, "Y:%s G:%s Out:%s", buf[0], buf[1], buf[2]);
+//     sprintf(secondRow, "Y:%s G:%s Sum:%s", buf[0], buf[1],
+//             (greenhouse.getSummerMode() ? "ON" : "OFF"));
+//   } else {
+//     char* firstRow = display.getWritableBuffer(0);
+//     char* secondRow = display.getWritableBuffer(1);
+//     ns_menu::renderMenu(firstRow, secondRow);
+//   }
+// }
+
+void buildGreenhouseMenu() {
   MenuItem item;
   item.parent = ns_menu::getRoot();
-  item.name = F("Greenhouse 1");
+  item.name = F("Greenhouse");
   item.isLeaf = false;
   auto rootId = ns_menu::addItem(item);
 
   item.name = F("Opening Temp");
   item.parent = rootId;
-  item.value = &firstGreenhouse.openingTemperature;
-  item.validator = validateFirstOpeningTemperature;
+  item.value = &greenhouse.openingTemperature;
+  item.validator = validateOpeningTemperature;
   item.isLeaf = true;
   ns_menu::addItem(item);
 
   item.name = F("Closing Temp");
   item.parent = rootId;
-  item.value = &firstGreenhouse.closingTemperature;
+  item.value = &greenhouse.closingTemperature;
   item.isLeaf = true;
-  item.validator = validateFirstClosingTemperature;
+  item.validator = validateClosingTemperature;
   ns_menu::addItem(item);
 
   item.name = F("Opening steps");
   item.parent = rootId;
-  item.value = reinterpret_cast<int8_t*>(&firstGreenhouse.openingSteps);
+  item.value = reinterpret_cast<int8_t*>(&greenhouse.openingSteps);
   item.isLeaf = true;
-  item.validator = validateFirstOpeningSteps;
+  item.validator = validateOpeningSteps;
   ns_menu::addItem(item);
 }
 
-// void buildSecondGreenhouseMenu() {
-//   MenuItem item;
-//   item.parent = ns_menu::getRoot();
-//   item.name = F("Greenhouse 2");
-//   item.isLeaf = false;
-//   auto rootId = ns_menu::addItem(item);
-//
-//   item.name = F("Opening Temp");
-//   item.parent = rootId;
-//   item.value = &secondGreenhouse.openingTemperature;
-//   item.isLeaf = true;
-//   item.validator = validateSecondOpeningTemperature;
-//   ns_menu::addItem(item);
-//
-//   item.name = F("Closing Temp");
-//   item.parent = rootId;
-//   item.value = &secondGreenhouse.closingTemperature;
-//   item.isLeaf = true;
-//   item.validator = validateSecondClosingTemperature;
-//   ns_menu::addItem(item);
-//
-//   item.name = F("Opening steps");
-//   item.parent = rootId;
-//   item.value = reinterpret_cast<int8_t*>(&secondGreenhouse.openingSteps);
-//   item.isLeaf = true;
-//   item.validator = validateSecondOpeningSteps;
-//   ns_menu::addItem(item);
-// }
-
-void buildScreenMenu() {
+void buildDisplayMenu() {
   MenuItem item;
   item.parent = ns_menu::getRoot();
   item.name = F("Screen light");
   item.isLeaf = true;
-  item.value = reinterpret_cast<int8_t*>(&ns_screen::screenLightSetting);
+  item.value = reinterpret_cast<int8_t*>(&display.screenLightingSetting_);
   item.hasCustomRepresenation = true;
-  item.represent = ns_screen::screenLightSettingRepresenter;
+  item.represent = ns_display::screenLightSettingRepresenter;
   ns_menu::addItem(item);
 }
 
 void repsentSummerMode(int8_t value, char* buffer) {
   if ((value & 1) == 0) {
-    strcpy_P(buffer, reinterpret_cast<const char*>(F("OFF")));
+    strcpy_P(buffer, reinterpret_cast<PGM_P>(F("OFF")));
   } else {
-    strcpy_P(buffer, reinterpret_cast<const char*>(F("ON")));
+    strcpy_P(buffer, reinterpret_cast<PGM_P>(F("ON")));
   }
 }
 
@@ -294,50 +278,35 @@ void espHandle(Stream* stream) {
   auto command = stream->read();  // we for sure know that stream is not empty
                                   // (see implementation of SerialConnector)
   if (command == COMMAND_GET_MEASURES) {
-    auto ytemp1 = static_cast<uint8_t>(firstGreenhouse.getYellowTemperature());
-    auto gtemp1 = static_cast<uint8_t>(firstGreenhouse.getGreenTemperature());
-    auto otemp = static_cast<uint8_t>(firstGreenhouse.getOutsideTemperature());
-    auto ytemp2 = static_cast<uint8_t>(secondGreenhouse.getYellowTemperature());
-    auto gtemp2 = static_cast<uint8_t>(secondGreenhouse.getGreenTemperature());
+    auto yellowTemperature =
+        static_cast<uint8_t>(greenhouse.getYellowTemperature());
+    auto greenTemperature =
+        static_cast<uint8_t>(greenhouse.getGreenTemperature());
+    auto outsideTemperature =
+        static_cast<uint8_t>(greenhouse.getOutsideTemperature());
     stream->write(OK);
-    uint8_t messageSize = 19;  // measures size
-    stream->write(uint8_t(messageSize));
-    stream->write(otemp);
+    uint8_t messageSize = 10;  // measures size
+    stream->write(messageSize);
+    stream->write(outsideTemperature);
 
-    stream->write(ytemp1);
-    stream->write(gtemp1);
-    stream->write(uint8_t(firstGreenhouse.getVentStatus()));
-    stream->write(
-        firstGreenhouse.getYellowPerCent());           // yellow window per cent
-    stream->write(firstGreenhouse.getGreenPerCent());  // green window per cent
-    stream->write(uint8_t(0));                         // blue humidity
-    stream->write(uint8_t(false));                     // blue watering status
-    stream->write(uint8_t(0));                         // red humidity
-    stream->write(uint8_t(false));                     // red watering status
-
-    stream->write(ytemp2);
-    stream->write(gtemp2);
-    stream->write(uint8_t(secondGreenhouse.getVentStatus()));
-    stream->write(
-        secondGreenhouse.getYellowPerCent());  // yellow window per cent
-    stream->write(secondGreenhouse.getGreenPerCent());  // green window per cent
-    stream->write(uint8_t(0));                          // blue humidity
-    stream->write(uint8_t(false));                      // blue watering status
-    stream->write(uint8_t(0));                          // red humidity
-    stream->write(uint8_t(false));                      // red watering status
+    stream->write(yellowTemperature);
+    stream->write(greenTemperature);
+    stream->write(uint8_t(greenhouse.getVentStatus()));
+    stream->write(greenhouse.getYellowPerCent());  // yellow window per cent
+    stream->write(greenhouse.getGreenPerCent());   // green window per cent
+    stream->write(uint8_t(0));                     // blue humidity
+    stream->write(uint8_t(false));                 // blue watering status
+    stream->write(uint8_t(0));                     // red humidity
+    stream->write(uint8_t(false));                 // red watering status
 
   } else if (command == COMMAND_GET_SETTINGS) {
     stream->write(OK);
-    uint8_t messageSize = 3 * 2;  // settings size
+    uint8_t messageSize = 3;  // settings size
     stream->write(uint8_t(messageSize));
 
-    stream->write(uint8_t(firstGreenhouse.getOpeningTemperature()));
-    stream->write(uint8_t(firstGreenhouse.getClosingTemperature()));
-    stream->write(firstGreenhouse.getStepsCount());
-
-    stream->write(uint8_t(secondGreenhouse.getOpeningTemperature()));
-    stream->write(uint8_t(secondGreenhouse.getClosingTemperature()));
-    stream->write(secondGreenhouse.getStepsCount());
+    stream->write(uint8_t(greenhouse.getOpeningTemperature()));
+    stream->write(uint8_t(greenhouse.getClosingTemperature()));
+    stream->write(greenhouse.getStepsCount());
   } else {
     /* Unsupported comand -> do nothing */
     logging::error(F("Unsupported command"));
@@ -345,25 +314,26 @@ void espHandle(Stream* stream) {
 }
 
 void skipEspTrashWriting() {
-  delay(3000);
+  delay(5000);
   while (Serial.available()) {
     Serial.read();
   }
 }
 
-void notifySystemBlocked() {
-  logging::info(F("Testing time finished. System stopped"));
-  const char* message[2];
-  message[0] = reinterpret_cast<const char*>(F("   Stop test   "));
-  message[1] = reinterpret_cast<const char*>(F("   Time is up  "));
-  char* line[2] = {ns_screen::getWritableBuffer(0),
-                   ns_screen::getWritableBuffer(1)};
-  for (int row = 0; row < 2; ++row) {
-    for (int i = 0;; ++i) {
-      char c = pgm_read_byte(message[row] + i);
-      line[row][i] = c;
-      if (c == '\0') break;
-    }
+static class : public Screen {
+  inline void renderFirst() final {
+    char* row = getFirstBuffer();
+    strcpy_P(row, reinterpret_cast<PGM_P>(F("   Stop test    ")));
   }
-  ns_screen::loop();
+
+  inline void renderSecond() final {
+    char* row = getSecondBuffer();
+    strcpy_P(row, reinterpret_cast<PGM_P>(F("   Time is up   ")));
+  }
+} blockedScreen;
+
+void notifySystemBlocked() {
+  logging2::info() << F("Testing time finished. System stopped");
+  display.setScreen(&blockedScreen);
+  display.loop();
 }

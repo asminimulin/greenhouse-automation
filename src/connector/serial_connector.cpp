@@ -31,12 +31,12 @@ bool SerialConnector::connect() {
 
 void SerialConnector::loop() {
   if (!isConnected_) return;
-  downTimer_ -= 1;
-  if (downTimer_ == 0) {
-    isConnected_ = ensureConnected();
-    downTimer_ = pingEveryNTimes_;
-    return;
-  }
+  // downTimer_ -= 1;
+  // if (downTimer_ == 0) {
+  //   isConnected_ = ensureConnected();
+  //   downTimer_ = pingEveryNTimes_;
+  //   return;
+  // }
   if (stream_->available() && nullptr != handler_) {
     handler_(stream_);
   }

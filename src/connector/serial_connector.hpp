@@ -16,7 +16,7 @@ inline void echoer(Stream* stream) {
 class SerialConnector {
  public:
   SerialConnector(Stream* stream, Handler cb = echoer,
-                  uint8_t pingEveryNTimes = 20, uint32_t readTimeout = 500);
+                  uint8_t pingEveryNTimes = 20, uint32_t readTimeout = 1500LU);
   bool begin();
   void loop();
   bool isConnected() const;

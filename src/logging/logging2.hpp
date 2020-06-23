@@ -1,3 +1,6 @@
+// #ifndef AUTOMATION_LOGGING_LOGGING2_HPP
+// #define AUTOMATION_LOGGING_LOGGING2_HPP
+
 #pragma once
 
 #include <Arduino.h>
@@ -14,14 +17,11 @@ enum LoggingLevel : uint8_t {
 };
 
 namespace private_ {
-Stream* stream_;
-LoggingLevel loggingLevel_;
+extern Stream* stream_;
+extern LoggingLevel loggingLevel_;
 }  // namespace private_
 
-void init(LoggingLevel loggingLevel, Stream* stream) {
-  private_::stream_ = stream;
-  private_::loggingLevel_ = loggingLevel;
-}
+void init(LoggingLevel loggingLevel, Stream* stream);
 
 class LoggingObject {
   friend LoggingObject debug();
@@ -52,23 +52,11 @@ class LoggingObject {
   }
 };
 
-LoggingObject debug() {
-  return LoggingObject(F("Debug:"),
-                       private_::loggingLevel_ <= LoggingLevel::DEBUG);
-}
+LoggingObject debug();
+LoggingObject info();
+LoggingObject error();
+LoggingObject warning();
 
-LoggingObject info() {
-  return LoggingObject(F("Info:"),
-                       private_::loggingLevel_ <= LoggingLevel::INFO);
-}
-
-LoggingObject error() {
-  return LoggingObject(F("Error:"),
-                       private_::loggingLevel_ <= LoggingLevel::ERROR);
-}
-
-LoggingObject warning() {
-  return LoggingObject(F("Warning:"),
-                       private_::loggingLevel_ <= LoggingLevel::WARNING);
-}
 }  // namespace logging2
+
+// #endif
