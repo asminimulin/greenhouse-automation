@@ -147,10 +147,11 @@ void handleDecrement() {
 }
 
 void handleIncrementPress() {
-  if (menuItems[currentItemId].isLeaf) {
-    if (!menuItems[currentItemId].isActivated) {
-      menuItems[currentItemId].isActivated = true;
-      menuItems[currentItemId].ownValue = *menuItems[currentItemId].value;
+  MenuItem& item = menuItems[currentItemId];
+  if (item.isLeaf) {
+    if (!item.isActivated) {
+      item.isActivated = true;
+      item.ownValue = *item.value;
     }
     return;
   }
