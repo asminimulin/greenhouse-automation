@@ -21,7 +21,6 @@
 void buildGreenhouseMenu();
 void buildDisplayMenu();
 void buildSummerModeMenu();
-void buildResetMenu();
 Greenhouse buildGreenhouse();
 
 Greenhouse greenhouse = buildGreenhouse();
@@ -90,7 +89,6 @@ void setup() {
   buildDisplayMenu();
   buildSummerModeMenu();
   buildGreenhouseMenu();
-  buildResetMenu();
   logging::info(F("Menu is ready"));
 
   /*

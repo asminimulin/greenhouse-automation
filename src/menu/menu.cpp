@@ -12,19 +12,6 @@ static uint8_t menuItemsUsed;
 static uint8_t currentItemId;
 static uint8_t childPosition;
 
-void printDebug() {
-  if (ENABLE_DEBUG_OUTPUT) {
-    Serial.print(F("Current id: "));
-    Serial.println(currentItemId);
-    Serial.print(F("isLeaf: "));
-    Serial.println(menuItems[currentItemId].isLeaf);
-    Serial.print(F("isActivated: "));
-    Serial.println(menuItems[currentItemId].isActivated);
-    Serial.print(F("childPosition: "));
-    Serial.println(childPosition);
-  }
-}
-
 void refreshChildPosition() {
   uint8_t parentId = menuItems[currentItemId].parent;
   childPosition = 0;
