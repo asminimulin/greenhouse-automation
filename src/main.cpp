@@ -1,6 +1,5 @@
 #include <Arduino.h>
 
-#include "blocker/blocker.hpp"
 #include "config.hpp"
 #include "connector/serial_connector.hpp"
 #include "display/display.hpp"
@@ -22,6 +21,7 @@
 void buildGreenhouseMenu();
 void buildDisplayMenu();
 void buildSummerModeMenu();
+void buildResetMenu();
 Greenhouse buildGreenhouse();
 
 Greenhouse greenhouse = buildGreenhouse();
@@ -48,15 +48,13 @@ void setup() {
 
   skipEspTrashWriting();
 
-  logging::setup(logging::NOTHING, &Serial);
-  logging2::init(logging2::NOTHING, &Serial);
-  /*
-   * Initializing blocking system.
-   */
-  logging::info(F("Initializing blocking system..."));
-  ns_blocker::init();
-  logging::info(F("Blocking system is ready.\n"));
-
+  if (ENABLE_DEBUG_OUTPUT) {
+    logging::setup(logging::DEBUG, &Serial);
+    logging2::init(logging2::DEBUG, &Serial);
+  } else {
+    logging::setup(logging::NOTHING, &Serial);
+    logging2::init(logging2::NOTHING, &Serial);
+  }
   /*
    * Initializing 1-Wire bus
    */
@@ -92,6 +90,7 @@ void setup() {
   buildDisplayMenu();
   buildSummerModeMenu();
   buildGreenhouseMenu();
+  buildResetMenu();
   logging::info(F("Menu is ready"));
 
   /*
@@ -116,13 +115,8 @@ void setup() {
 }
 
 void loop() {
-  if (ns_blocker::isBlocked()) {
-    notifySystemBlocked();
-    idle();
-  }
   greenhouse.loop();
   espConnector.loop();
-  ns_blocker::updateTime();
   getDS2413Driver()->loop();
   display.loop();
   ns_ds18b20::refreshTemperatures();
