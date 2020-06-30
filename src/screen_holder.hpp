@@ -3,7 +3,7 @@
 #include <stdint-gcc.h>
 
 #include "idle.hpp"
-#include "logging/logging2.hpp"
+#include "logging/logging.hpp"
 
 template <uint8_t maxScreenCount>
 class ScreenHolder {
@@ -15,7 +15,7 @@ class ScreenHolder {
 
   inline void registerScreen(Screen* screen) {
     if (screensCount_ == maxScreenCount) {
-      logging2::error() << F(
+      logging::error() << F(
           "Too many screens. Not enough space in screen holder.");
       idle();
     }

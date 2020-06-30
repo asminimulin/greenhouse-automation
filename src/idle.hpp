@@ -4,14 +4,13 @@
 
 #include "logging/logging.hpp"
 
-
 inline void idle() {
-    logging::error(F("idle()"));
-    interrupts();
-    while(1) {
-        logging::error(F("idle()"));
-        delay(5000lu);
-    }
+  logging::error() << F("idle()");
+  interrupts();
+  while (1) {
+    logging::error() << F("idle()");
+    delay(5000lu);
+  }
 }
 
 #endif

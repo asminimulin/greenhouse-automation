@@ -3,7 +3,6 @@
 #include <EEPROM.h>
 
 #include "logging/logging.hpp"
-#include "logging/logging2.hpp"
 
 Greenhouse::Greenhouse(const GreenhouseConfig& config,
                        uint16_t settingsPosition)
@@ -36,20 +35,17 @@ void Greenhouse::loop() {
   int8_t greenTemperature = greenSensor_.getTemperature();
   int8_t outsideTemperature = outsideSensor_.getTemperature();
   if (yellowTemperature == -127) {
-    // logging::warning(F("Yellow sensor is dead"));
     yellowTemperature = greenTemperature;
   }
   if (greenTemperature == -127) {
-    // logging::warning(F("Green sensor is dead"));
     greenTemperature = yellowTemperature;
   }
   if (yellowTemperature == -127 && greenTemperature == -127) {
-    // logging::error(F("Inside sensors are dead"));
     yellowTemperature = greenTemperature = outsideSensor_.getTemperature();
   }
   if (outsideTemperature == -127 && yellowTemperature == -127 &&
       greenTemperature == -127) {
-    logging::error(F("All temperature sensors are died."));
+    logging::error() << F("All temperature sensors are died.");
     return;
   }
 
@@ -110,7 +106,6 @@ void Greenhouse::loop() {
   bool shouldOffVent =
       ventMode_ == VENT_AUTO && averageTemperature <= ventOnTemperature - 2;
   // NOTE: 2 is histeresis value for vent ON/OFF
-  // logging2::debug() << F("vent mode =") << int(ventMode_);
   shouldOffVent |= ventMode_ == VENT_DISABLE;
   if (shouldOnVent) {
     if (vent_.getState() != VentState::VENT_ON)
@@ -124,7 +119,7 @@ void Greenhouse::loop() {
 void Greenhouse::loadSettings() {
   auto position = settingsPosition_;
   if (EEPROM.read(position) == HAS_VALID_DATA) {
-    logging::info(F("Loading greenhouse settings"));
+    logging::info() << F("Loading greenhouse settings");
     position += sizeof(HAS_VALID_DATA);
     EEPROM.get(position, openingTemperature);
     position += sizeof(openingTemperature);
@@ -137,11 +132,11 @@ void Greenhouse::loadSettings() {
     EEPROM.get(position, ventMode_);
     position += sizeof(ventMode_);
   }
-  logging::info(F("Using default settings"));
+  logging::info() << F("Using default settings");
 }
 
 void Greenhouse::saveSettings() {
-  logging::info(F("Save greenhouse settings"));
+  logging::info() << F("Save greenhouse settings");
   auto position = settingsPosition_;
   EEPROM.write(position, HAS_VALID_DATA);
   position += sizeof(HAS_VALID_DATA);

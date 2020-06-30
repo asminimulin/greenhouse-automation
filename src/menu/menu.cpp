@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 #include "idle.hpp"
-#include "logging/logging2.hpp"
+#include "logging/logging.hpp"
 
 namespace {
 
@@ -91,7 +91,7 @@ void init() {
 
 uint8_t addItem(const MenuItem& newItem) {
   if (menuItemsUsed == menuItemsCount) {
-    logging::error(F("No more menu items to hold full menu"));
+    logging::error() << F("No more menu items to hold full menu");
     idle();
   }
   MenuItem& item = menuItems[menuItemsUsed];

@@ -13,7 +13,6 @@
 #include "greenhouse/greenhouse.hpp"
 #include "idle.hpp"
 #include "logging/logging.hpp"
-#include "logging/logging2.hpp"
 #include "menu/menu.hpp"
 #include "menu/menu_validators.hpp"
 #include "screen_holder.hpp"
@@ -48,66 +47,64 @@ void setup() {
   skipEspTrashWriting();
 
   if (ENABLE_DEBUG_OUTPUT) {
-    logging::setup(logging::DEBUG, &Serial);
-    logging2::init(logging2::DEBUG, &Serial);
+    logging::init(logging::DEBUG, &Serial);
   } else {
-    logging::setup(logging::NOTHING, &Serial);
-    logging2::init(logging2::NOTHING, &Serial);
+    logging::init(logging::NOTHING, &Serial);
   }
   /*
    * Initializing 1-Wire bus
    */
-  logging::info(F("Initializing 1-Wire bus..."));
+  logging::info() << F("Initializing 1-Wire bus...");
   initOneWire();
-  logging::info(F("1-Wire bus is ready."));
+  logging::info() << F("1-Wire bus is ready.");
 
-  logging::info(F("Initializing greenhouse..."));
+  logging::info() << F("Initializing greenhouse...");
   greenhouse.loadSettings();
-  logging::info(F("Greenhouse is ready."));
+  logging::info() << F("Greenhouse is ready.");
 
-  logging::info(F("Initializing ds18b20 protocol implementation..."));
+  logging::info() << F("Initializing ds18b20 protocol implementation...");
   ns_ds18b20::init();
-  logging::info(F("ds18b20 protocol is ready to use."));
+  logging::info() << F("ds18b20 protocol is ready to use.");
 
-  logging::info(F("Initializing menu..."));
+  logging::info() << F("Initializing menu...");
   ns_menu::init();
-  logging::info(F("menu is ready"));
+  logging::info() << F("menu is ready");
 
-  logging::info(F("Initializing display..."));
+  logging::info() << F("Initializing display...");
   screenHolder.registerScreen(&yellowWindowScreen);
   screenHolder.registerScreen(&greenWindowScreen);
   screenHolder.registerScreen(&outsideScreen);
   display.begin();
   display.setScreen(screenHolder.getActiveScreen());
-  logging::info(F("display is ready"));
+  logging::info() << F("display is ready");
 
-  logging::info(F("Initializing encoder..."));
+  logging::info() << F("Initializing encoder...");
   ns_encoder::init();
-  logging::info(F("encoder is ready"));
+  logging::info() << F("encoder is ready");
 
-  logging::info(F("Building menu"));
+  logging::info() << F("Building menu");
   buildDisplayMenu();
   buildSummerModeMenu();
   buildGreenhouseMenu();
-  logging::info(F("Menu is ready"));
+  logging::info() << F("Menu is ready");
 
   /*
    * Estabilishing connection with esp8266 module
    */
-  logging::info(F("Estabilishing connection with esp8266 module"));
+  logging::info() << F("Estabilishing connection with esp8266 module");
   if (espConnector.begin()) {
-    logging::info(F("Connection with esp8266 successfully estabilished"));
+    logging::info() << F("Connection with esp8266 successfully estabilished");
   } else {
-    logging::error(F("Failed to estabilish connection with esp8266"));
+    logging::error() << F("Failed to estabilish connection with esp8266");
   }
 
-  logging::info(F("System is ready."));
+  logging::info() << F("System is ready.");
 
-  logging::info(F("Starting greenhouse..."));
+  logging::info() << F("Starting greenhouse...");
   if (greenhouse.begin()) {
-    logging::info(F("Greenhouse successfully started."));
+    logging::info() << F("Greenhouse successfully started.");
   } else {
-    logging::error(F("Failed to start greenhouse."));
+    logging::error() << F("Failed to start greenhouse.");
     idle();
   }
 }
@@ -181,7 +178,7 @@ void ventModeRepresenter(int8_t value, char* buffer) {
   } else if (value == Greenhouse::VENT_AUTO) {
     strcpy_P(buffer, reinterpret_cast<PGM_P>(F("AUTO")));
   } else {
-    logging2::error() << F("ventModeRepresnter got invalid value.");
+    logging::error() << F("ventModeRepresnter got invalid value.");
     idle();
   }
 }
@@ -297,7 +294,7 @@ void espHandle(Stream* stream) {
     stream->write(greenhouse.getStepsCount());
   } else {
     /* Unsupported command -> do nothing */
-    logging::error(F("Unsupported command"));
+    logging::error() << F("Unsupported command");
   }
 }
 
@@ -321,7 +318,7 @@ static class : public Screen {
 } blockedScreen;
 
 void notifySystemBlocked() {
-  logging2::info() << F("Testing time finished. System stopped");
+  logging::info() << F("Testing time finished. System stopped");
   display.setScreen(&blockedScreen);
   display.loop();
 }

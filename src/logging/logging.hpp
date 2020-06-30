@@ -1,11 +1,13 @@
-#ifndef LOGGING_HPP
-#define LOGGING_HPP
+// #ifndef AUTOMATION_LOGGING_LOGGING2_HPP
+// #define AUTOMATION_LOGGING_LOGGING2_HPP
+
+#pragma once
 
 #include <Arduino.h>
 
 namespace logging {
 
-enum LoggingLevel {
+enum LoggingLevel : uint8_t {
   ALL,
   DEBUG,
   INFO,
@@ -14,41 +16,47 @@ enum LoggingLevel {
   NOTHING,
 };
 
-void setup(LoggingLevel level, Print* output);
+namespace private_ {
+extern Stream* stream_;
+extern LoggingLevel loggingLevel_;
+}  // namespace private_
 
-void debug(const __FlashStringHelper* message);
+void init(LoggingLevel loggingLevel, Stream* stream);
 
-template <typename T>
-void debug(const T& arg) {
-  Serial.println(arg);
-}
+class LoggingObject {
+  friend LoggingObject debug();
+  friend LoggingObject info();
+  friend LoggingObject error();
+  friend LoggingObject warning();
 
-void error(const __FlashStringHelper* message);
+ public:
+  template <typename T>
+  LoggingObject& operator<<(const T& value) {
+    if (activated_) {
+      private_::stream_->print(' ');
+      private_::stream_->print(value);
+    }
+    return *this;
+  }
 
-template <typename T>
-void error(const T& arg) {
-  Serial.print("Error: ");
-  Serial.println(arg);
-}
+  ~LoggingObject() {
+    if (activated_) private_::stream_->println();
+  }
 
-void warning(const __FlashStringHelper* message);
+ private:
+  bool activated_;
 
-template <typename T>
-void warning(const T& arg) {
-  Serial.print("Warning: ");
-  Serial.println(arg);
-}
+  LoggingObject(const __FlashStringHelper* loggingType, bool activated = true)
+      : activated_(activated) {
+    if (activated) private_::stream_->print(loggingType);
+  }
+};
 
-void info(const __FlashStringHelper* message);
-
-template <typename T>
-void info(const T& arg) {
-  Serial.print("Info: ");
-  Serial.println(arg);
-}
-
-void debug(const int& i);
+LoggingObject debug();
+LoggingObject info();
+LoggingObject error();
+LoggingObject warning();
 
 }  // namespace logging
 
-#endif
+// #endif

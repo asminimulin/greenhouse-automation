@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "global_singletons.hpp"
-#include "logging/logging2.hpp"
+#include "logging/logging.hpp"
 #include "one_wire_address_holder.hpp"
 
 DS2413::DS2413(const uint8_t* address) {
@@ -13,11 +13,11 @@ DS2413::DS2413(const uint8_t* address) {
 
 bool DS2413::setState(uint8_t state) {
   if (isBusy()) {
-    logging::error(F("Tried to setState on busy ds2413"));
+    logging::error() << F("Tried to setState on busy ds2413");
     return false;
   }
   if (state_ == state) {
-    logging2::warning() << F("Setting the same state on ds2413");
+    logging::warning() << F("Setting the same state on ds2413");
     return false;
   }
   state_ = state;
@@ -35,7 +35,7 @@ bool DS2413::setState(uint8_t state) {
   }
   ow->reset();
   if (!ack) {
-    logging::debug(F("Failed to write to ds2413"));
+    logging::debug() << F("Failed to write to ds2413");
   }
   return ack;
 }

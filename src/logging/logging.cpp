@@ -1,66 +1,35 @@
 #include "logging.hpp"
 
-namespace {  //  module private
-
-Print* writer;
-logging::LoggingLevel level;
-
-void print(const __FlashStringHelper* text, bool printNewLine = true) {
-  auto* ptr = reinterpret_cast<const char*>(text);
-  if (writer) {
-    for (int i = 0;; ++i) {
-      char c = pgm_read_byte(ptr + i);
-      if (c == '\0') break;
-      writer->write(c);
-    }
-  }
-  // add newline
-  if (printNewLine) writer->write('\n');
-  writer->flush();
-}
-}  // namespace
-
 namespace logging {
 
-void setup(LoggingLevel level, Print* output) {
-  writer = output;
-  ::level = level;
+namespace private_ {
+Stream* stream_;
+LoggingLevel loggingLevel_;
+}  // namespace private_
+
+void init(LoggingLevel loggingLevel, Stream* stream) {
+  private_::stream_ = stream;
+  private_::loggingLevel_ = loggingLevel;
 }
 
-void debug(const __FlashStringHelper* message) {
-  if (LoggingLevel::DEBUG >= level) {
-    print(F("Debug -> "), false);
-    print(message);
-  }
+LoggingObject debug() {
+  return LoggingObject(F("Debug:"),
+                       private_::loggingLevel_ <= LoggingLevel::DEBUG);
 }
 
-void debug(const int& t) {
-  if (level <= LoggingLevel::DEBUG) {
-    print(F("Debug -> "), false);
-    writer->print(t);
-    writer->print('\n');
-  }
+LoggingObject info() {
+  return LoggingObject(F("Info:"),
+                       private_::loggingLevel_ <= LoggingLevel::INFO);
 }
 
-void warning(const __FlashStringHelper* message) {
-  if (LoggingLevel::WARNING >= level) {
-    print(F("Warning -> "), false);
-    print(message);
-  }
+LoggingObject error() {
+  return LoggingObject(F("Error:"),
+                       private_::loggingLevel_ <= LoggingLevel::ERROR);
 }
 
-void error(const __FlashStringHelper* message) {
-  if (LoggingLevel::ERROR >= level) {
-    print(F("Error -> "), false);
-    print(message);
-  }
-}
-
-void info(const __FlashStringHelper* message) {
-  if (LoggingLevel::INFO >= level) {
-    print(F("Info -> "), false);
-    print(message);
-  }
+LoggingObject warning() {
+  return LoggingObject(F("Warning:"),
+                       private_::loggingLevel_ <= LoggingLevel::WARNING);
 }
 
 }  // namespace logging

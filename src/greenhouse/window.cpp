@@ -20,7 +20,7 @@ bool Window::begin() {
 
 void Window::stepOpen(int32_t time) {
   if (!isValid_) {
-    logging::error(F("Window is invalid"));
+    logging::error() << F("Window is invalid");
     return;
   }
   // In practise we have problem with non 100% reliable 1-Wire connection
@@ -35,19 +35,19 @@ void Window::stepOpen(int32_t time) {
       if (!getDS2413Driver()->hasTask(task)) {
         getDS2413Driver()->createTask(task);
       } else {
-        logging::info(
-            F("No need to add opening task, because it is already exists"));
+        logging::info() << F(
+            "No need to add opening task, because it is already exists");
       }
     }  // new
     balance_ = constrain(balance_, time, fullTime_ + timeInfelicity);
   } else {
-    logging::info(F("No need to open: balance is maximum"));
+    logging::info() << F("No need to open: balance is maximum");
   }
 }
 
 void Window::stepClose(int32_t time) {
   if (!isValid_) {
-    logging::error(F("Window is invalid"));
+    logging::error() << F("Window is invalid");
     return;
   }
   // In practise we have problem with non 100% reliable 1-Wire connection
@@ -63,12 +63,12 @@ void Window::stepClose(int32_t time) {
       if (!getDS2413Driver()->hasTask(task)) {
         getDS2413Driver()->createTask(task);
       } else {
-        logging::info(
-            F("No need to add closing task, because it is already exists"));
+        logging::info() << F(
+            "No need to add closing task, because it is already exists");
       }
     }
     balance_ = constrain(balance_, -timeInfelicity, fullTime_ - time);
   } else {
-    logging::info(F("No need to close: balance is minimum"));
+    logging::info() << F("No need to close: balance is minimum");
   }
 }

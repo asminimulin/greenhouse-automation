@@ -4,8 +4,6 @@
 #include <assert.h>
 #include <stdint-gcc.h>
 
-#include <logging/logging.hpp>
-
 #include "idle.hpp"
 
 /* ****************************************************************************
@@ -67,7 +65,7 @@ class DS2413Driver {
     tail_ = 0;
     allowDuplicates_ = false;
     if (MAX_TASKS_COUNT <= 0) {
-      logging::error(F("Invalid tasks count in DS2413Driver."));
+      logging::error() << F("Invalid tasks count in DS2413Driver.");
       idle();
     }
   }
@@ -104,11 +102,11 @@ class DS2413Driver {
   // Add task to queue
   void createTask(const Task& task) {
     if (isFull()) {
-      logging::warning(F("Queue is full. Cannot insert new task"));
+      logging::warning() << F("Queue is full. Cannot insert new task");
       return;
     }
     if (hasTask(task) && !allowDuplicates_) {
-      logging::warning(F("Duplicated task."));
+      logging::warning() << F("Duplicated task.");
       return;
     }
     appendTask(task);
@@ -127,18 +125,19 @@ class DS2413Driver {
     // Here we know for sure, that queue is not full
     queue_[tail_] = task;
     tail_ = (tail_ + 1) % MAX_TASKS_COUNT;
-    logging::info(F("Task appended"));
+    logging::info() << F("Task appended");
   }
 
   void popTask() noexcept {
     // Here we know for sure that queue is not empty
     head_ = (head_ + 1) % MAX_TASKS_COUNT;
-    logging::info(F("Task removed"));
+    logging::info() << F("Task removed");
   }
 
   Task& frontTask() {
     if (isEmpty()) {
-      logging::error(F("Queue is empty. But trying to access front task."));
+      logging::error() << F(
+          "Queue is empty. But trying to access front task.");
       idle();
     }
     return queue_[head_];
