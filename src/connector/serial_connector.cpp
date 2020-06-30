@@ -19,8 +19,8 @@ SerialConnector::SerialConnector(Stream* stream, Handler handler,
       downTimer_(0) {}
 
 bool SerialConnector::begin() {
-  isConnected_ = connect();
-  downTimer_ = pingEveryNTimes_;
+  // isConnected_ = connect();
+  isConnected_ = true;
   return isConnected_;
 }
 
@@ -31,12 +31,6 @@ bool SerialConnector::connect() {
 
 void SerialConnector::loop() {
   if (!isConnected_) return;
-  // downTimer_ -= 1;
-  // if (downTimer_ == 0) {
-  //   isConnected_ = ensureConnected();
-  //   downTimer_ = pingEveryNTimes_;
-  //   return;
-  // }
   if (stream_->available() && nullptr != handler_) {
     handler_(stream_);
   }
