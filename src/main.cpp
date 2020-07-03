@@ -191,21 +191,21 @@ void buildGreenhouseMenu() {
 
   item.name = F("Opening Temp");
   item.parent = rootId;
-  item.value = &greenhouse.openingTemperature;
+  item.value = &greenhouse.settings_.openingTemperature;
   item.validator = validateOpeningTemperature;
   item.isLeaf = true;
   ns_menu::addItem(item);
 
   item.name = F("Closing Temp");
   item.parent = rootId;
-  item.value = &greenhouse.closingTemperature;
+  item.value = &greenhouse.settings_.closingTemperature;
   item.isLeaf = true;
   item.validator = validateClosingTemperature;
   ns_menu::addItem(item);
 
   item.name = F("Opening steps");
   item.parent = rootId;
-  item.value = reinterpret_cast<int8_t*>(&greenhouse.openingSteps);
+  item.value = reinterpret_cast<int8_t*>(&greenhouse.settings_.stepsCount);
   item.isLeaf = true;
   item.validator = validateOpeningSteps;
   ns_menu::addItem(item);
@@ -245,7 +245,7 @@ void buildSummerModeMenu() {
   item.parent = ns_menu::getRoot();
   item.name = F("Summer mode");
   item.isLeaf = true;
-  item.value = reinterpret_cast<int8_t*>(&(greenhouse.summerMode));
+  item.value = reinterpret_cast<int8_t*>(&(greenhouse.settings_.summerMode));
   item.hasCustomRepresenation = true;
   item.represent = repsentSummerMode;
   ns_menu::addItem(item);
@@ -254,11 +254,21 @@ void buildSummerModeMenu() {
 enum EspCommandInterfaces : uint8_t {
   COMMAND_GET_MEASURES = '1',
   COMMAND_GET_SETTINGS = '2',
+  COMMAND_SET_SETTINGS = '3',
 };
 enum StatusCode : uint8_t {
   OK = 0,
-  ERROR = 1,
+  ERROR = 255,
 };
+
+int readSync(Stream* stream, uint32_t delay) {
+  uint32_t start = millis();
+  while (!stream->available() && millis() - start > delay) {
+    ::delay(10);
+  }
+  return stream->read();
+}
+
 void espHandle(Stream* stream) {
   auto command = stream->read();  // we for sure know that stream is not empty
                                   // (see implementation of SerialConnector)
@@ -269,11 +279,10 @@ void espHandle(Stream* stream) {
         static_cast<uint8_t>(greenhouse.getGreenTemperature());
     auto outsideTemperature =
         static_cast<uint8_t>(greenhouse.getOutsideTemperature());
-    stream->write(OK);
     uint8_t messageSize = 10;  // measures size
+    stream->write(OK);
     stream->write(messageSize);
     stream->write(outsideTemperature);
-
     stream->write(yellowTemperature);
     stream->write(greenTemperature);
     stream->write(uint8_t(greenhouse.getVentStatus()));
@@ -283,18 +292,39 @@ void espHandle(Stream* stream) {
     stream->write(uint8_t(false));                 // blue watering status
     stream->write(uint8_t(0));                     // red humidity
     stream->write(uint8_t(false));                 // red watering status
-
   } else if (command == COMMAND_GET_SETTINGS) {
+    const ns_greenhouse::settings_t& settings = greenhouse.getSettings();
+    uint8_t messageSize = sizeof(settings);
     stream->write(OK);
-    uint8_t messageSize = 3;  // settings size
-    stream->write(uint8_t(messageSize));
-
-    stream->write(uint8_t(greenhouse.getOpeningTemperature()));
-    stream->write(uint8_t(greenhouse.getClosingTemperature()));
-    stream->write(greenhouse.getStepsCount());
+    stream->write(messageSize);
+    stream->write(reinterpret_cast<const char*>(&settings), messageSize);
+  } else if (command == COMMAND_SET_SETTINGS) {
+    int messageSize = readSync(stream, 200);
+    if (messageSize == -1) {
+      stream->write(ERROR);
+      return;
+    }
+    char* buffer = new char[messageSize];
+    bool ok = true;
+    for (int i = 0; i < messageSize; ++i) {
+      buffer[i] = readSync(stream, 35);
+      if (buffer[i] == -1) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) {
+      stream->write(OK);
+      auto settings = greenhouse.getSettings();
+      memcpy(&settings, buffer, messageSize);
+      greenhouse.setSettings(settings);
+    } else {
+      stream->write(ERROR);
+    }
+    delete buffer;
   } else {
     /* Unsupported command -> do nothing */
-    logging::error() << F("Unsupported command");
+    logging::warning() << F("Unsupported command");
   }
 }
 

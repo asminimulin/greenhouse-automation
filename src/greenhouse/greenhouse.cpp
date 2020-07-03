@@ -11,15 +11,8 @@ Greenhouse::Greenhouse(const GreenhouseConfig& config,
       yellowSensor_(config.yellowSensorAddress),
       greenSensor_(config.greenSensorAddress),
       outsideSensor_(config.outsideSensorAddress),
-      vent_(config.ventAddress),
-      openingTime(config.openingTime),
-      temperatureInnercyDelay(config.temperatureInnercyDelay) {
+      vent_(config.ventAddress) {
   settingsPosition_ = settingsPosition;
-  openingSteps = 6;
-  openingTemperature = 24;
-  closingTemperature = 20;
-  summerMode = true;
-  ventMode_ = VENT_AUTO;
 }
 
 bool Greenhouse::begin() {
@@ -27,7 +20,7 @@ bool Greenhouse::begin() {
 }
 
 void Greenhouse::loop() {
-  summerMode &= 1;
+  settings_.summerMode &= 0b1;
   yellowWindow_.loop();
   greenWindow_.loop();
 
@@ -51,12 +44,12 @@ void Greenhouse::loop() {
 
   bool shouldOpenYellowWindow =
       outsideSensor_.getTemperature() > outsideMotorEnablingTemperature &&
-      yellowTemperature > openingTemperature;
-  shouldOpenYellowWindow &= bool(summerMode);
+      yellowTemperature > settings_.openingTemperature;
+  shouldOpenYellowWindow &= bool(settings_.summerMode);
   shouldOpenYellowWindow |= yellowTemperature >= criticalHighTemperature;
   if (shouldOpenYellowWindow) {
-    if (!yellowWindow_.isBusy() &&
-        millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
+    if (!yellowWindow_.isBusy() && millis() - yellowWindowStateChangedAt >
+                                       settings_.temperatureInnercyDelay) {
       yellowWindow_.stepOpen(getOneStepTime());
       yellowWindowStateChangedAt = millis();
     }
@@ -64,47 +57,49 @@ void Greenhouse::loop() {
 
   bool shouldOpenGreenWindow =
       outsideSensor_.getTemperature() > outsideMotorEnablingTemperature &&
-      greenTemperature > openingTemperature;
-  shouldOpenGreenWindow &= bool(summerMode);
+      greenTemperature > settings_.openingTemperature;
+  shouldOpenGreenWindow &= bool(settings_.summerMode);
   shouldOpenGreenWindow |= greenTemperature >= criticalHighTemperature;
   if (shouldOpenGreenWindow) {
-    if (!greenWindow_.isBusy() &&
-        millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
+    if (!greenWindow_.isBusy() && millis() - greenWindowStateChangedAt >
+                                      settings_.temperatureInnercyDelay) {
       greenWindow_.stepOpen(getOneStepTime());
       greenWindowStateChangedAt = millis();
     }
   }
 
-  bool shouldCloseYellowWindow = yellowTemperature < closingTemperature &&
-                                 yellowTemperature < criticalHighTemperature;
+  bool shouldCloseYellowWindow =
+      yellowTemperature < settings_.closingTemperature &&
+      yellowTemperature < criticalHighTemperature;
   shouldCloseYellowWindow |= outsideTemperature <= criticalLowTemperature;
-  shouldCloseYellowWindow |= !bool(summerMode);
+  shouldCloseYellowWindow |= !bool(settings_.summerMode);
   if (shouldCloseYellowWindow) {
-    if (!yellowWindow_.isBusy() &&
-        millis() - yellowWindowStateChangedAt > temperatureInnercyDelay) {
+    if (!yellowWindow_.isBusy() && millis() - yellowWindowStateChangedAt >
+                                       settings_.temperatureInnercyDelay) {
       yellowWindow_.stepClose(getOneStepTime());
       yellowWindowStateChangedAt = millis();
     }
   }
 
-  bool shouldCloseGreenWindow = greenTemperature < closingTemperature &&
-                                greenTemperature < criticalHighTemperature;
+  bool shouldCloseGreenWindow =
+      greenTemperature < settings_.closingTemperature &&
+      greenTemperature < criticalHighTemperature;
   shouldCloseGreenWindow |= outsideTemperature <= criticalLowTemperature;
-  shouldCloseGreenWindow |= !bool(summerMode);
+  shouldCloseGreenWindow |= !bool(settings_.summerMode);
   if (shouldCloseGreenWindow) {
-    if (!greenWindow_.isBusy() &&
-        millis() - greenWindowStateChangedAt > temperatureInnercyDelay) {
+    if (!greenWindow_.isBusy() && millis() - greenWindowStateChangedAt >
+                                      settings_.temperatureInnercyDelay) {
       greenWindow_.stepClose(getOneStepTime());
       greenWindowStateChangedAt = millis();
     }
   }
 
   int averageTemperature = (int(yellowTemperature) + int(greenTemperature)) / 2;
-  bool shouldOnVent =
-      averageTemperature >= ventOnTemperature && ventMode_ == VENT_AUTO;
+  bool shouldOnVent = averageTemperature >= settings_.ventOnTemperature &&
+                      ventMode_ == VENT_AUTO;
   shouldOnVent |= ventMode_ == VENT_ENABLE;
-  bool shouldOffVent =
-      ventMode_ == VENT_AUTO && averageTemperature <= ventOnTemperature - 2;
+  bool shouldOffVent = ventMode_ == VENT_AUTO &&
+                       averageTemperature <= settings_.ventOnTemperature - 2;
   // NOTE: 2 is histeresis value for vent ON/OFF
   shouldOffVent |= ventMode_ == VENT_DISABLE;
   if (shouldOnVent) {
@@ -121,16 +116,7 @@ void Greenhouse::loadSettings() {
   if (EEPROM.read(position) == HAS_VALID_DATA) {
     logging::info() << F("Loading greenhouse settings");
     position += sizeof(HAS_VALID_DATA);
-    EEPROM.get(position, openingTemperature);
-    position += sizeof(openingTemperature);
-    EEPROM.get(position, closingTemperature);
-    position += sizeof(closingTemperature);
-    EEPROM.get(position, openingSteps);
-    position += sizeof(openingSteps);
-    EEPROM.get(position, summerMode);
-    position += sizeof(summerMode);
-    EEPROM.get(position, ventMode_);
-    position += sizeof(ventMode_);
+    EEPROM.get(position, settings_);
   }
   logging::info() << F("Using default settings");
 }
@@ -140,16 +126,7 @@ void Greenhouse::saveSettings() {
   auto position = settingsPosition_;
   EEPROM.write(position, HAS_VALID_DATA);
   position += sizeof(HAS_VALID_DATA);
-  EEPROM.put(position, openingTemperature);
-  position += sizeof(openingTemperature);
-  EEPROM.put(position, closingTemperature);
-  position += sizeof(closingTemperature);
-  EEPROM.put(position, openingSteps);
-  position += sizeof(openingSteps);
-  EEPROM.put(position, summerMode);
-  position += sizeof(summerMode);
-  EEPROM.put(position, ventMode_);
-  position += sizeof(ventMode_);
+  EEPROM.put(position, settings_);
 }
 
 void Greenhouse::getTempRepresentation(int8_t temperature, char* buffer) {
@@ -160,4 +137,10 @@ void Greenhouse::getTempRepresentation(int8_t temperature, char* buffer) {
   } else {
     sprintf(buffer, "%d", temperature);
   }
+}
+
+bool Greenhouse::getSummerMode() const noexcept { return settings_.summerMode; }
+
+void Greenhouse::setSummeMode(bool enabled) noexcept {
+  settings_.summerMode = enabled;
 }

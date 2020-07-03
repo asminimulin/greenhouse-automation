@@ -17,6 +17,23 @@ struct GreenhouseConfig {
   uint32_t temperatureInnercyDelay;
 };
 
+namespace ns_greenhouse {
+
+#pragma pack(push, 1)
+struct settings_t {
+  uint64_t openingTime = OPENING_TIME;
+  uint64_t temperatureInnercyDelay = TEMPERATURE_INNERCY_DELAY;
+  int8_t openingTemperature = 30;
+  int8_t closingTemperature = 25;
+  int8_t ventOnTemperature = 20;
+  uint8_t stepsCount = 4;
+  uint8_t summerMode = 0;
+  uint8_t ventMode = 0;
+};
+#pragma pack(pop)
+
+}  // namespace ns_greenhouse
+
 class Greenhouse {
   friend void buildGreenhouseMenu();
   friend bool validateOpeningTemperature(int8_t temp);
@@ -24,6 +41,8 @@ class Greenhouse {
   friend bool validateOpeningSteps(int8_t steps);
   friend void buildSummerModeMenu();
   friend void ventModeRepresenter(int8_t value, char* buffer);
+
+  using settings_t = ns_greenhouse::settings_t;
 
  public:
   Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition);
@@ -35,25 +54,53 @@ class Greenhouse {
   int8_t getOutsideTemperature() { return outsideSensor_.getTemperature(); }
   int8_t getYellowTemperature() { return yellowSensor_.getTemperature(); }
   int8_t getGreenTemperature() { return greenSensor_.getTemperature(); }
-  bool getSummerMode() const noexcept { return bool(summerMode & 1); }
-  void setSummeMode(bool enabled) noexcept { summerMode = enabled; }
   inline bool getVentStatus() noexcept { return vent_.getState() == VENT_ON; }
+
   inline uint8_t getYellowPerCent() const noexcept {
     return yellowWindow_.getPerCent();
   }
+
   inline uint8_t getGreenPerCent() const noexcept {
     return greenWindow_.getPerCent();
   }
+
+  bool getSummerMode() const noexcept;
+  void setSummeMode(bool enabled) noexcept;
+
+  inline void setOpeningTemperature(int8_t openingTemperature) noexcept {
+    settings_.openingTemperature = openingTemperature;
+  }
   inline int8_t getOpeningTemperature() const noexcept {
-    return openingTemperature;
+    return settings_.openingTemperature;
+  }
+
+  inline void setClosingTemperature(int8_t closingTemperature) noexcept {
+    settings_.closingTemperature = closingTemperature;
   }
   inline int8_t getClosingTemperature() const noexcept {
-    return closingTemperature;
+    return settings_.closingTemperature;
   }
-  inline uint8_t getStepsCount() const noexcept { return openingSteps; }
+
+  inline void setStepsCount(uint8_t stepsCount) noexcept {
+    settings_.stepsCount = stepsCount;
+  }
+  inline uint8_t getStepsCount() const noexcept { return settings_.stepsCount; }
+
+  inline const settings_t& getSettingsReference() const noexcept {
+    return settings_;
+  }
+  inline settings_t getSettings() const noexcept { return settings_; }
+  inline void setSettings(const settings_t& settings) noexcept {
+    settings_ = settings;
+    saveSettings();
+  }
 
  private:
-  uint32_t getOneStepTime() const { return openingTime / openingSteps; }
+  uint32_t getOneStepTime() const {
+    return settings_.openingTime / settings_.stepsCount;
+  }
+
+  settings_t settings_;
 
   Window yellowWindow_;
   Window greenWindow_;
@@ -61,10 +108,6 @@ class Greenhouse {
   DS18B20 greenSensor_;
   DS18B20 outsideSensor_;
   DS2413 vent_;
-
-  // Not user avialable properties
-  uint32_t openingTime = 40LU * 1000LU;
-  uint32_t temperatureInnercyDelay = 0.25 * 60LU * 1000LU;
 
   // Motor
   uint32_t yellowWindowStateChangedAt = 0;
@@ -78,16 +121,8 @@ class Greenhouse {
   };
   uint16_t settingsPosition_;
 
-  // User available properties
- private:
-  int8_t openingTemperature = 24;
-  int8_t closingTemperature = 20;
-  uint8_t openingSteps = 6;
-  uint8_t summerMode;
-
   // Vent
  private:
-  static constexpr int8_t ventOnTemperature = 25;
   enum VentState {
     VENT_ON = 0b10,
     VENT_OFF = 0b00,
