@@ -1,7 +1,8 @@
 #include <Arduino.h>
 
+#include "communication/esp_handler.hpp"
 #include "config.hpp"
-#include "connector/serial_connector.hpp"
+// #include "connector/serial_connector.hpp"
 #include "display/display.hpp"
 #include "display/green_window_screen.hpp"
 #include "display/menu_screen.hpp"
@@ -34,8 +35,10 @@ ScreenHolder<totalScreensCount> screenHolder;
 
 Display display(LCD_ADDRESS);
 
-void espHandle(Stream* stream);
-serial_connector::SerialConnector espConnector(&Serial, espHandle);
+// void espHandle(Stream* stream);
+// serial_connector::SerialConnector espConnector(&Serial, espHandle);
+
+EspHandler espHandler(&Serial, greenhouse);
 
 void skipEspTrashWriting();
 
@@ -91,12 +94,13 @@ void setup() {
   /*
    * Estabilishing connection with esp8266 module
    */
-  logging::info() << F("Estabilishing connection with esp8266 module");
-  if (espConnector.begin()) {
-    logging::info() << F("Connection with esp8266 successfully estabilished");
-  } else {
-    logging::error() << F("Failed to estabilish connection with esp8266");
-  }
+  // logging::info() << F("Estabilishing connection with esp8266 module");
+  // if (espConnector.begin()) {
+  //   logging::info() << F("Connection with esp8266 successfully
+  //   estabilished");
+  // } else {
+  //   logging::error() << F("Failed to estabilish connection with esp8266");
+  // }
 
   logging::info() << F("System is ready.");
 
@@ -111,10 +115,11 @@ void setup() {
 
 void loop() {
   greenhouse.loop();
-  espConnector.loop();
+  // espConnector.loop();
   getDS2413Driver()->loop();
   display.loop();
   ns_ds18b20::refreshTemperatures();
+  espHandler.loop();
 }
 
 Greenhouse buildGreenhouse() {
@@ -251,82 +256,83 @@ void buildSummerModeMenu() {
   ns_menu::addItem(item);
 }
 
-enum EspCommandInterfaces : uint8_t {
-  COMMAND_GET_MEASURES = '1',
-  COMMAND_GET_SETTINGS = '2',
-  COMMAND_SET_SETTINGS = '3',
-};
-enum StatusCode : uint8_t {
-  OK = 0,
-  ERROR = 255,
-};
+// enum EspCommandInterfaces : uint8_t {
+//   COMMAND_GET_MEASURES = '1',
+//   COMMAND_GET_SETTINGS = '2',
+//   COMMAND_SET_SETTINGS = '3',
+// };
+// enum StatusCode : uint8_t {
+//   OK = 0,
+//   ERROR = 255,
+// };
 
-int readSync(Stream* stream, uint32_t delay) {
-  uint32_t start = millis();
-  while (!stream->available() && millis() - start > delay) {
-    ::delay(10);
-  }
-  return stream->read();
-}
+// int readSync(Stream* stream, uint32_t delay) {
+//   uint32_t start = millis();
+//   while (!stream->available() && millis() - start > delay) {
+//     ::delay(10);
+//   }
+//   return stream->read();
+// }
 
-void espHandle(Stream* stream) {
-  auto command = stream->read();  // we for sure know that stream is not empty
-                                  // (see implementation of SerialConnector)
-  if (command == COMMAND_GET_MEASURES) {
-    auto yellowTemperature =
-        static_cast<uint8_t>(greenhouse.getYellowTemperature());
-    auto greenTemperature =
-        static_cast<uint8_t>(greenhouse.getGreenTemperature());
-    auto outsideTemperature =
-        static_cast<uint8_t>(greenhouse.getOutsideTemperature());
-    uint8_t messageSize = 10;  // measures size
-    stream->write(OK);
-    stream->write(messageSize);
-    stream->write(outsideTemperature);
-    stream->write(yellowTemperature);
-    stream->write(greenTemperature);
-    stream->write(uint8_t(greenhouse.getVentStatus()));
-    stream->write(greenhouse.getYellowPerCent());  // yellow window per cent
-    stream->write(greenhouse.getGreenPerCent());   // green window per cent
-    stream->write(uint8_t(0));                     // blue humidity
-    stream->write(uint8_t(false));                 // blue watering status
-    stream->write(uint8_t(0));                     // red humidity
-    stream->write(uint8_t(false));                 // red watering status
-  } else if (command == COMMAND_GET_SETTINGS) {
-    const ns_greenhouse::settings_t& settings = greenhouse.getSettings();
-    uint8_t messageSize = sizeof(settings);
-    stream->write(OK);
-    stream->write(messageSize);
-    stream->write(reinterpret_cast<const char*>(&settings), messageSize);
-  } else if (command == COMMAND_SET_SETTINGS) {
-    int messageSize = readSync(stream, 200);
-    if (messageSize == -1) {
-      stream->write(ERROR);
-      return;
-    }
-    char* buffer = new char[messageSize];
-    bool ok = true;
-    for (int i = 0; i < messageSize; ++i) {
-      buffer[i] = readSync(stream, 35);
-      if (buffer[i] == -1) {
-        ok = false;
-        break;
-      }
-    }
-    if (ok) {
-      stream->write(OK);
-      auto settings = greenhouse.getSettings();
-      memcpy(&settings, buffer, messageSize);
-      greenhouse.setSettings(settings);
-    } else {
-      stream->write(ERROR);
-    }
-    delete buffer;
-  } else {
-    /* Unsupported command -> do nothing */
-    logging::warning() << F("Unsupported command");
-  }
-}
+// void espHandle(Stream* stream) {
+//   auto command = stream->read();  // we for sure know that stream is not
+//   empty
+//                                   // (see implementation of SerialConnector)
+//   if (command == COMMAND_GET_MEASURES) {
+//     auto yellowTemperature =
+//         static_cast<uint8_t>(greenhouse.getYellowTemperature());
+//     auto greenTemperature =
+//         static_cast<uint8_t>(greenhouse.getGreenTemperature());
+//     auto outsideTemperature =
+//         static_cast<uint8_t>(greenhouse.getOutsideTemperature());
+//     uint8_t messageSize = 10;  // measures size
+//     stream->write(OK);
+//     stream->write(messageSize);
+//     stream->write(outsideTemperature);
+//     stream->write(yellowTemperature);
+//     stream->write(greenTemperature);
+//     stream->write(uint8_t(greenhouse.getVentStatus()));
+//     stream->write(greenhouse.getYellowPerCent());  // yellow window per cent
+//     stream->write(greenhouse.getGreenPerCent());   // green window per cent
+//     stream->write(uint8_t(0));                     // blue humidity
+//     stream->write(uint8_t(false));                 // blue watering status
+//     stream->write(uint8_t(0));                     // red humidity
+//     stream->write(uint8_t(false));                 // red watering status
+//   } else if (command == COMMAND_GET_SETTINGS) {
+//     const ns_greenhouse::settings_t& settings = greenhouse.getSettings();
+//     uint8_t messageSize = sizeof(settings);
+//     stream->write(OK);
+//     stream->write(messageSize);
+//     stream->write(reinterpret_cast<const char*>(&settings), messageSize);
+//   } else if (command == COMMAND_SET_SETTINGS) {
+//     int messageSize = readSync(stream, 200);
+//     if (messageSize == -1) {
+//       stream->write(ERROR);
+//       return;
+//     }
+//     char* buffer = new char[messageSize];
+//     bool ok = true;
+//     for (int i = 0; i < messageSize; ++i) {
+//       buffer[i] = readSync(stream, 35);
+//       if (buffer[i] == -1) {
+//         ok = false;
+//         break;
+//       }
+//     }
+//     if (ok) {
+//       stream->write(OK);
+//       auto settings = greenhouse.getSettings();
+//       memcpy(&settings, buffer, messageSize);
+//       greenhouse.setSettings(settings);
+//     } else {
+//       stream->write(ERROR);
+//     }
+//     delete buffer;
+//   } else {
+/* Unsupported command -> do nothing */
+// logging::warning() << F("Unsupported command");
+// }
+// }
 
 void skipEspTrashWriting() {
   delay(2000);

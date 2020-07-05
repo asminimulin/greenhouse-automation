@@ -144,3 +144,23 @@ bool Greenhouse::getSummerMode() const noexcept { return settings_.summerMode; }
 void Greenhouse::setSummeMode(bool enabled) noexcept {
   settings_.summerMode = enabled;
 }
+
+void Greenhouse::setYellowSensorAddress(uint8_t* address) {
+  yellowSensor_.setAddress(address);
+}
+
+void Greenhouse::setGreenSensorAddress(uint8_t* address) {
+  greenSensor_.setAddress(address);
+}
+
+void Greenhouse::setOutsideSensorAddress(uint8_t* address) {
+  outsideSensor_.setAddress(address);
+}
+
+void Greenhouse::setYellowWindowAddress(uint8_t* address) {
+  yellowWindow_.setAddress(address);
+}
+
+void Greenhouse::setGreenWindowAddress(uint8_t* address) {
+  greenWindow_.setAddress(address);
+}

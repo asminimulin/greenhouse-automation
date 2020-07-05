@@ -95,6 +95,17 @@ class Greenhouse {
     saveSettings();
   }
 
+ public:
+  /**
+   * Hardware configuration methods
+   */
+  void setYellowSensorAddress(uint8_t* address);
+  void setGreenSensorAddress(uint8_t* address);
+  void setOutsideSensorAddress(uint8_t* address);
+  void setYellowWindowAddress(uint8_t* address);
+  void setGreenWindowAddress(uint8_t* address);
+  void setVentAddress(uint8_t* address);
+
  private:
   uint32_t getOneStepTime() const {
     return settings_.openingTime / settings_.stepsCount;

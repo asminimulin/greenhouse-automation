@@ -13,6 +13,7 @@ typedef uint8_t DeviceAddress[8];
 class Window {
  public:
   Window(uint32_t openingTime, const DeviceAddress address) noexcept;
+  void setAddress(uint8_t* address);
   void stepOpen(int32_t time);
   void stepClose(int32_t time);
   inline void loop() { device_.loop(); }

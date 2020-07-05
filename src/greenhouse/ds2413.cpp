@@ -59,3 +59,9 @@ void DS2413::setStateFor(uint8_t state, uint32_t time) {
   setState(state);
   isBusy_ = true;
 }
+
+void DS2413::setAddress(uint8_t* address) {
+  for (size_t i = 0; i < sizeof(address_); ++i) {
+    address_[i] = address[i];
+  }
+}

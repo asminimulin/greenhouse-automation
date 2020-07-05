@@ -11,6 +11,7 @@ class DS2413 {
   uint8_t getState() const;
   void loop();
   bool isBusy() const;
+  void setAddress(uint8_t* address);
 
  private:
   uint8_t address_[8];

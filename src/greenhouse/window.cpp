@@ -12,6 +12,8 @@ Window::Window(uint32_t fullTime, const DeviceAddress address) noexcept
   stoppingRoutine_.w = this;
 }
 
+void Window::setAddress(uint8_t* address) { device_.setAddress(address); }
+
 bool Window::begin() {
   balance_ = fullTime_;
   stepClose(fullTime_);

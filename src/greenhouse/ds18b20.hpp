@@ -18,6 +18,7 @@ bool refreshTemperatures();
 class DS18B20 {
  public:
   DS18B20(const DeviceAddress& address);
+  void setAddress(const uint8_t* address);
   virtual int8_t getTemperature();
 
  private:
