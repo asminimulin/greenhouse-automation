@@ -50,50 +50,29 @@ class Greenhouse {
   void loadSettings();
   void saveSettings();
   void loop();
-  static void getTempRepresentation(int8_t temperature, char* buffer);
-  int8_t getOutsideTemperature() { return outsideSensor_.getTemperature(); }
-  int8_t getYellowTemperature() { return yellowSensor_.getTemperature(); }
-  int8_t getGreenTemperature() { return greenSensor_.getTemperature(); }
-  inline bool getVentStatus() noexcept { return vent_.getState() == VENT_ON; }
+  int8_t getOutsideTemperature() noexcept;
+  int8_t getYellowTemperature() noexcept;
+  int8_t getGreenTemperature() noexcept;
+  bool isVentEnabled() const noexcept;
 
-  inline uint8_t getYellowPerCent() const noexcept {
-    return yellowWindow_.getPerCent();
-  }
-
-  inline uint8_t getGreenPerCent() const noexcept {
-    return greenWindow_.getPerCent();
-  }
+  uint8_t getYellowPerCent() const noexcept;
+  uint8_t getGreenPerCent() const noexcept;
 
   bool getSummerMode() const noexcept;
   void setSummeMode(bool enabled) noexcept;
 
-  inline void setOpeningTemperature(int8_t openingTemperature) noexcept {
-    settings_.openingTemperature = openingTemperature;
-  }
-  inline int8_t getOpeningTemperature() const noexcept {
-    return settings_.openingTemperature;
-  }
+  void setOpeningTemperature(int8_t openingTemperature) noexcept;
+  int8_t getOpeningTemperature() const noexcept;
 
-  inline void setClosingTemperature(int8_t closingTemperature) noexcept {
-    settings_.closingTemperature = closingTemperature;
-  }
-  inline int8_t getClosingTemperature() const noexcept {
-    return settings_.closingTemperature;
-  }
+  void setClosingTemperature(int8_t closingTemperature) noexcept;
+  int8_t getClosingTemperature() const noexcept;
 
-  inline void setStepsCount(uint8_t stepsCount) noexcept {
-    settings_.stepsCount = stepsCount;
-  }
-  inline uint8_t getStepsCount() const noexcept { return settings_.stepsCount; }
+  void setStepsCount(uint8_t stepsCount) noexcept;
+  uint8_t getStepsCount() const noexcept;
 
-  inline const settings_t& getSettingsReference() const noexcept {
-    return settings_;
-  }
-  inline settings_t getSettings() const noexcept { return settings_; }
-  inline void setSettings(const settings_t& settings) noexcept {
-    settings_ = settings;
-    saveSettings();
-  }
+  const settings_t& getSettingsReference() const noexcept;
+  settings_t getSettings() const noexcept;
+  void setSettings(const settings_t& settings) noexcept;
 
  public:
   /**
@@ -107,9 +86,7 @@ class Greenhouse {
   void setVentAddress(uint8_t* address);
 
  private:
-  uint32_t getOneStepTime() const {
-    return settings_.openingTime / settings_.stepsCount;
-  }
+  uint32_t getOneStepTime() const noexcept;
 
   settings_t settings_;
 

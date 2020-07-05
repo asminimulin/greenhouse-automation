@@ -78,7 +78,7 @@ void EspHandler::getMeasures() {
   int8_t yellowTemperature = greenhouse_.getYellowTemperature();
   int8_t greenTemperature = greenhouse_.getGreenTemperature();
   int8_t outsideTemperature = greenhouse_.getOutsideTemperature();
-  uint8_t ventState = greenhouse_.getVentStatus();
+  uint8_t ventState = greenhouse_.isVentEnabled();
   uint8_t yellowPerCent = greenhouse_.getYellowPerCent();
   uint8_t greenPerCent = greenhouse_.getGreenPerCent();
   uint8_t blueHumidity = 0;
