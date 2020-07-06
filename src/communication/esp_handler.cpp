@@ -113,6 +113,7 @@ void EspHandler::setSettings() {
   ns_greenhouse::settings_t settings;
   if (!readSync(settingsSize)) return;
   memcpy(&settings, buffer_, settingsSize);
+  greenhouse_.setSettings(settings);
   writeEmptyResponse(OK);
 }
 

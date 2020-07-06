@@ -22,7 +22,6 @@ void init() {
   dt.setResolution(MINIMAL_RESOLUTION);
   dt.setWaitForConversion(false);
   CONVERSION_TIME = dt.millisToWaitForConversion(MINIMAL_RESOLUTION);
-  // CONVERSION_TIME = 1000;
 }
 
 bool refreshTemperatures() {
@@ -40,11 +39,13 @@ DS18B20::DS18B20(const DeviceAddress& address) : lastUpdate_(0) {
   memcpy(address_, address, 8);
 }
 
-void DS18B20::setAddress(const uint8_t* address) {
+void DS18B20::setAddress(const uint8_t* address) noexcept {
   for (size_t i = 0; i < sizeof(address_); ++i) {
     address_[i] = address[i];
   }
 }
+
+const uint8_t* DS18B20::getAddress() const noexcept { return address_; }
 
 int8_t DS18B20::getTemperature() {
   if (millis() > ns_ds18b20::lastRequest + ns_ds18b20::CONVERSION_TIME &&

@@ -6,15 +6,13 @@
 #include "ds2413.hpp"
 #include "window.hpp"
 
-struct GreenhouseConfig {
+struct GreenhouseAddresses {
   DeviceAddress yellowSensorAddress;
   DeviceAddress greenSensorAddress;
   DeviceAddress outsideSensorAddress;
-  DeviceAddress yellowMotorAddress;
-  DeviceAddress greenMotorAddress;
+  DeviceAddress yellowWindowAddress;
+  DeviceAddress greenWindowAddress;
   DeviceAddress ventAddress;
-  uint32_t openingTime;
-  uint32_t temperatureInnercyDelay;
 };
 
 namespace ns_greenhouse {
@@ -45,7 +43,7 @@ class Greenhouse {
   using settings_t = ns_greenhouse::settings_t;
 
  public:
-  Greenhouse(const GreenhouseConfig& config, uint16_t settingsPosition);
+  Greenhouse(const GreenhouseAddresses& addresses, uint16_t settingsPosition);
   bool begin();
   void loadSettings();
   void saveSettings();
@@ -54,29 +52,23 @@ class Greenhouse {
   int8_t getYellowTemperature() noexcept;
   int8_t getGreenTemperature() noexcept;
   bool isVentEnabled() const noexcept;
-
   uint8_t getYellowPerCent() const noexcept;
   uint8_t getGreenPerCent() const noexcept;
-
   bool getSummerMode() const noexcept;
   void setSummeMode(bool enabled) noexcept;
-
   void setOpeningTemperature(int8_t openingTemperature) noexcept;
   int8_t getOpeningTemperature() const noexcept;
-
   void setClosingTemperature(int8_t closingTemperature) noexcept;
   int8_t getClosingTemperature() const noexcept;
-
   void setStepsCount(uint8_t stepsCount) noexcept;
   uint8_t getStepsCount() const noexcept;
-
   const settings_t& getSettingsReference() const noexcept;
   settings_t getSettings() const noexcept;
   void setSettings(const settings_t& settings) noexcept;
 
  public:
   /**
-   * Hardware configuration methods
+   * Addresses configuration methods
    */
   void setYellowSensorAddress(uint8_t* address);
   void setGreenSensorAddress(uint8_t* address);
@@ -84,6 +76,8 @@ class Greenhouse {
   void setYellowWindowAddress(uint8_t* address);
   void setGreenWindowAddress(uint8_t* address);
   void setVentAddress(uint8_t* address);
+  bool loadAddressesFromEEPROM();
+  void saveAddressesToEEPROM();
 
  private:
   uint32_t getOneStepTime() const noexcept;

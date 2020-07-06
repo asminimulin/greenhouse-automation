@@ -7,7 +7,13 @@
 
 constexpr bool ENABLE_DEBUG_OUTPUT = false;
 
-constexpr uint16_t EEPROM_PROPERTIES_ADDRESS = 200;
+constexpr uint16_t SETTINGS_EEPROM_POSITION = 200;
+// This value is only need to check if settings were saved in EEPROM previously
+const uint8_t SETTINGS_EEPROM_PROTECTION_VALUE = 0x01;
+
+constexpr uint16_t ONE_WIRE_ADDRESSES_EEPROM_POSITION = 300;
+// This value is only need to check if addresses were saved in EEPROM previously
+constexpr uint8_t ONE_WIRE_ADDRESSES_EEPROM_PROTECTION_VALUE = 0x11;
 
 constexpr uint8_t YELLOW_SENSOR_ADDRESS[8] = {0};
 
@@ -21,9 +27,9 @@ constexpr uint8_t GREEN_MOTOR_ADDRESS[8] = {0};
 
 constexpr uint8_t VENT_ADDRESS[8] = {0};
 
-constexpr uint32_t OPENING_TIME = 4LU * 1000LU;
+constexpr uint32_t OPENING_TIME = 38LU * 1000LU;
 
-constexpr uint32_t TEMPERATURE_INNERCY_DELAY = 0.25 * 60LU * 1000LU;
+constexpr uint32_t TEMPERATURE_INNERCY_DELAY = 4 * 60LU * 1000LU;
 
 constexpr uint8_t HISTERESIS = 2;
 

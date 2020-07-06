@@ -63,6 +63,7 @@ void setup() {
 
   logging::info() << F("Initializing greenhouse...");
   greenhouse.loadSettings();
+  greenhouse.loadAddressesFromEEPROM();
   logging::info() << F("Greenhouse is ready.");
 
   logging::info() << F("Initializing ds18b20 protocol implementation...");
@@ -91,17 +92,6 @@ void setup() {
   buildGreenhouseMenu();
   logging::info() << F("Menu is ready");
 
-  /*
-   * Estabilishing connection with esp8266 module
-   */
-  // logging::info() << F("Estabilishing connection with esp8266 module");
-  // if (espConnector.begin()) {
-  //   logging::info() << F("Connection with esp8266 successfully
-  //   estabilished");
-  // } else {
-  //   logging::error() << F("Failed to estabilish connection with esp8266");
-  // }
-
   logging::info() << F("System is ready.");
 
   logging::info() << F("Starting greenhouse...");
@@ -123,16 +113,14 @@ void loop() {
 }
 
 Greenhouse buildGreenhouse() {
-  GreenhouseConfig config;
-  memcpy(config.yellowSensorAddress, YELLOW_SENSOR_ADDRESS, 8);
-  memcpy(config.greenSensorAddress, GREEN_SENSOR_ADDRESS, 8);
-  memcpy(config.outsideSensorAddress, OUTSIDE_SENSOR_ADDRESS, 8);
-  memcpy(config.yellowMotorAddress, YELLOW_MOTOR_ADDRESS, 8);
-  memcpy(config.greenMotorAddress, GREEN_MOTOR_ADDRESS, 8);
-  memcpy(config.ventAddress, VENT_ADDRESS, 8);
-  config.openingTime = OPENING_TIME;
-  config.temperatureInnercyDelay = TEMPERATURE_INNERCY_DELAY;
-  return Greenhouse(config, EEPROM_PROPERTIES_ADDRESS);
+  GreenhouseAddresses adresses;
+  memcpy(adresses.yellowSensorAddress, YELLOW_SENSOR_ADDRESS, 8);
+  memcpy(adresses.greenSensorAddress, GREEN_SENSOR_ADDRESS, 8);
+  memcpy(adresses.outsideSensorAddress, OUTSIDE_SENSOR_ADDRESS, 8);
+  memcpy(adresses.yellowWindowAddress, YELLOW_MOTOR_ADDRESS, 8);
+  memcpy(adresses.greenWindowAddress, GREEN_MOTOR_ADDRESS, 8);
+  memcpy(adresses.ventAddress, VENT_ADDRESS, 8);
+  return Greenhouse(adresses, SETTINGS_EEPROM_POSITION);
 }
 
 void ns_encoder::increment() {

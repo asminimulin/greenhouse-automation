@@ -2,16 +2,18 @@
 
 #include <EEPROM.h>
 
+#include "config.hpp"
 #include "logging/logging.hpp"
+#include "one_wire_address.hpp"
 
-Greenhouse::Greenhouse(const GreenhouseConfig& config,
+Greenhouse::Greenhouse(const GreenhouseAddresses& addresses,
                        uint16_t settingsPosition)
-    : yellowWindow_(config.openingTime, config.yellowMotorAddress),
-      greenWindow_(config.openingTime, config.greenMotorAddress),
-      yellowSensor_(config.yellowSensorAddress),
-      greenSensor_(config.greenSensorAddress),
-      outsideSensor_(config.outsideSensorAddress),
-      vent_(config.ventAddress) {
+    : yellowWindow_(OPENING_TIME, addresses.yellowWindowAddress),
+      greenWindow_(OPENING_TIME, addresses.greenWindowAddress),
+      yellowSensor_(addresses.yellowSensorAddress),
+      greenSensor_(addresses.greenSensorAddress),
+      outsideSensor_(addresses.outsideSensorAddress),
+      vent_(addresses.ventAddress) {
   settingsPosition_ = settingsPosition;
 }
 
@@ -199,14 +201,17 @@ void Greenhouse::setSettings(const settings_t& settings) noexcept {
 
 void Greenhouse::setYellowSensorAddress(uint8_t* address) {
   yellowSensor_.setAddress(address);
+  saveAddressesToEEPROM();
 }
 
 void Greenhouse::setGreenSensorAddress(uint8_t* address) {
   greenSensor_.setAddress(address);
+  saveAddressesToEEPROM();
 }
 
 void Greenhouse::setOutsideSensorAddress(uint8_t* address) {
   outsideSensor_.setAddress(address);
+  saveAddressesToEEPROM();
 }
 
 void Greenhouse::setYellowWindowAddress(uint8_t* address) {
@@ -215,6 +220,77 @@ void Greenhouse::setYellowWindowAddress(uint8_t* address) {
 
 void Greenhouse::setGreenWindowAddress(uint8_t* address) {
   greenWindow_.setAddress(address);
+  saveAddressesToEEPROM();
+}
+
+void Greenhouse::setVentAddress(uint8_t* address) {
+  vent_.setAddress(address);
+  saveAddressesToEEPROM();
+}
+
+bool Greenhouse::loadAddressesFromEEPROM() {
+  int position = ONE_WIRE_ADDRESSES_EEPROM_POSITION;
+  uint8_t protectionValue = EEPROM.read(position);
+  if (protectionValue == ONE_WIRE_ADDRESSES_EEPROM_PROTECTION_VALUE) {
+    position += sizeof(ONE_WIRE_ADDRESSES_EEPROM_PROTECTION_VALUE);
+    RamOneWireAddress address;
+
+    EEPROM.get(position, address);
+    yellowSensor_.setAddress(address.getRawAddress());
+    position += sizeof(address);
+
+    EEPROM.get(position, address);
+    greenSensor_.setAddress(address.getRawAddress());
+    position += sizeof(address);
+
+    EEPROM.get(position, address);
+    outsideSensor_.setAddress(address.getRawAddress());
+    position += sizeof(address);
+
+    EEPROM.get(position, address);
+    yellowWindow_.setAddress(address.getRawAddress());
+    position += sizeof(address);
+
+    EEPROM.get(position, address);
+    greenWindow_.setAddress(address.getRawAddress());
+    position += sizeof(address);
+
+    EEPROM.get(position, address);
+    vent_.setAddress(address.getRawAddress());
+
+    return true;
+  }
+  return false;
+}
+
+void Greenhouse::saveAddressesToEEPROM() {
+  int position = ONE_WIRE_ADDRESSES_EEPROM_POSITION;
+  EEPROM.write(position, ONE_WIRE_ADDRESSES_EEPROM_PROTECTION_VALUE);
+  position += sizeof(ONE_WIRE_ADDRESSES_EEPROM_PROTECTION_VALUE);
+  RamOneWireAddress address;
+
+  address.setRawAddress(yellowSensor_.getAddress());
+  EEPROM.put(position, address);
+  position += sizeof(address);
+
+  address.setRawAddress(greenSensor_.getAddress());
+  EEPROM.put(position, address);
+  position += sizeof(address);
+
+  address.setRawAddress(outsideSensor_.getAddress());
+  EEPROM.put(position, address);
+  position += sizeof(address);
+
+  address.setRawAddress(yellowWindow_.getAddress());
+  EEPROM.put(position, address);
+  position += sizeof(address);
+
+  address.setRawAddress(greenWindow_.getAddress());
+  EEPROM.get(position, address);
+  position += sizeof(address);
+
+  address.setRawAddress(vent_.getAddress());
+  EEPROM.put(position, address);
 }
 
 uint32_t Greenhouse::getOneStepTime() const noexcept {

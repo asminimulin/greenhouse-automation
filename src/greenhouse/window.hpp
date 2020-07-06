@@ -5,7 +5,6 @@
 
 #include "ds2413.hpp"
 #include "ds2413_driver.hpp"
-#include "one_wire_address_progmem.hpp"
 #include "stdint.h"
 
 typedef uint8_t DeviceAddress[8];
@@ -13,7 +12,8 @@ typedef uint8_t DeviceAddress[8];
 class Window {
  public:
   Window(uint32_t openingTime, const DeviceAddress address) noexcept;
-  void setAddress(uint8_t* address);
+  void setAddress(const uint8_t* address);
+  const uint8_t* getAddress() const noexcept;
   void stepOpen(int32_t time);
   void stepClose(int32_t time);
   inline void loop() { device_.loop(); }

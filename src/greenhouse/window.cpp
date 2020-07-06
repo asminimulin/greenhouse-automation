@@ -12,7 +12,11 @@ Window::Window(uint32_t fullTime, const DeviceAddress address) noexcept
   stoppingRoutine_.w = this;
 }
 
-void Window::setAddress(uint8_t* address) { device_.setAddress(address); }
+void Window::setAddress(const uint8_t* address) { device_.setAddress(address); }
+
+const uint8_t* Window::getAddress() const noexcept {
+  return device_.getAddress();
+}
 
 bool Window::begin() {
   balance_ = fullTime_;

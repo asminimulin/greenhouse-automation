@@ -6,11 +6,6 @@
 
 namespace {
 
-void fillSpaces(char* buffer) {
-  memset(buffer, ' ', LCD_COLUMNS);
-  buffer[LCD_COLUMNS] = '\0';
-}
-
 void fillSpaces(char* buffer, int start, int end) {
   if (end <= start) return;
   memset(&buffer[start], ' ', end - start);
