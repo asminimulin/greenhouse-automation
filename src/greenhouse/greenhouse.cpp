@@ -2,8 +2,9 @@
 
 #include <EEPROM.h>
 
+#include <logging.hpp>
+
 #include "config.hpp"
-#include "logging/logging.hpp"
 #include "one_wire_address.hpp"
 
 Greenhouse::Greenhouse(const GreenhouseAddresses& addresses,

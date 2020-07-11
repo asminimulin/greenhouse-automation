@@ -1,0 +1,3 @@
+[submodule "lib/logging"]
+	path = lib/logging
+	url = git@github.com:asminimulin/lightweight-logging-lib.git

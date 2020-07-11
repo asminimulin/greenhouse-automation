@@ -1,6 +1,6 @@
 #include "esp_handler.hpp"
 
-#include "logging/logging.hpp"
+#include <logging.hpp>
 
 EspHandler::EspHandler(Stream* stream, Greenhouse& greenhouse,
                        uint64_t queryTimeout)

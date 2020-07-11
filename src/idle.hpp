@@ -2,7 +2,7 @@
 #define IDLE_HPP
 #include <Arduino.h>
 
-#include "logging/logging.hpp"
+#include "logging.hpp"
 
 inline void idle() {
   logging::error() << F("idle()");

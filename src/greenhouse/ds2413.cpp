@@ -2,8 +2,9 @@
 
 #include <stdint.h>
 
+#include <logging.hpp>
+
 #include "global_singletons.hpp"
-#include "logging/logging.hpp"
 #include "one_wire_address_holder.hpp"
 
 DS2413::DS2413(const uint8_t* address) {

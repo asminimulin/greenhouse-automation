@@ -1,8 +1,9 @@
 #include <Arduino.h>
 
+#include <logging.hpp>
+
 #include "communication/esp_handler.hpp"
 #include "config.hpp"
-// #include "connector/serial_connector.hpp"
 #include "display/display.hpp"
 #include "display/green_window_screen.hpp"
 #include "display/menu_screen.hpp"
@@ -13,7 +14,6 @@
 #include "greenhouse/ds2413_driver.hpp"
 #include "greenhouse/greenhouse.hpp"
 #include "idle.hpp"
-#include "logging/logging.hpp"
 #include "menu/menu.hpp"
 #include "menu/menu_validators.hpp"
 #include "screen_holder.hpp"

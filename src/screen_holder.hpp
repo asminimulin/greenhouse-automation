@@ -2,8 +2,9 @@
 
 #include <stdint-gcc.h>
 
+#include <logging.hpp>
+
 #include "idle.hpp"
-#include "logging/logging.hpp"
 
 template <uint8_t maxScreenCount>
 class ScreenHolder {

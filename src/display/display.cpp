@@ -1,8 +1,9 @@
 #include "display.hpp"
 
+#include <logging.hpp>
+
 #include "config.hpp"
 #include "idle.hpp"
-#include "logging/logging.hpp"
 
 namespace {
 

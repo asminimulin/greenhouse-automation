@@ -1,8 +1,9 @@
 #include "window.hpp"
 
+#include <logging.hpp>
+
 #include "ds2413_driver.hpp"
 #include "global_singletons.hpp"
-#include "logging/logging.hpp"
 
 Window::Window(uint32_t fullTime, const DeviceAddress address) noexcept
     : device_(address), balance_(0), fullTime_(fullTime) {
